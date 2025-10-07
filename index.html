@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gelir-Gider Takip Pro — Geliştirilmiş v3</title>
+<title>Gelir-Gider Takip Pro – Geliştirilmiş v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -23,6 +23,16 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .logo h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .logo-icon{font-size:36px}
 .header-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hamburger-btn{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:22px;transition:.3s;color:#fff;display:none}
+.hamburger-btn:hover{background:rgba(255,255,255,.3);transform:scale(1.05)}
+.mobile-menu{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:var(--bg-card);box-shadow:-4px 0 20px var(--shadow-lg);z-index:2500;transition:right .3s ease;padding:20px;overflow-y:auto}
+.mobile-menu.active{right:0}
+.mobile-menu-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--border-color)}
+.mobile-menu-close{background:var(--danger);border:none;width:36px;height:36px;border-radius:8px;color:#fff;font-size:20px;cursor:pointer}
+.mobile-menu-item{padding:14px;margin-bottom:8px;background:var(--bg-secondary);border-radius:10px;border:2px solid var(--border-color);cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px;transition:.2s}
+.mobile-menu-item:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2400;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.menu-overlay.active{opacity:1;visibility:visible}
 .theme-toggle{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:22px;transition:.3s;color:#fff;min-width:48px}
 .theme-toggle:hover{background:rgba(255,255,255,.3);transform:scale(1.05)}
 .period-selector{display:flex;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:6px;border-radius:12px;flex-wrap:wrap}
@@ -93,7 +103,6 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border:2px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary)}
 .notification{position:fixed;top:90px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:12px;font-weight:800;color:#fff;z-index:3000;box-shadow:0 8px 30px rgba(0,0,0,.3);animation:slideDown .2s ease}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes slideUp{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(-16px)}}
 .table{width:100%;border-collapse:collapse}
 .table th,.table td{padding:10px;border-bottom:1px solid var(--border-color);text-align:left}
 .table th{background:var(--primary);color:#fff;position:sticky;top:0}
@@ -101,12 +110,55 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .scroll-btn{width:46px;height:46px;border-radius:50%;background:var(--bg-card);border:2px solid var(--border-color);font-size:22px;cursor:pointer}
 .floating-add-btn{position:fixed;right:24px;bottom:24px;width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--success),#38a169);border:none;color:#fff;font-size:30px;cursor:pointer;box-shadow:0 8px 30px rgba(72,187,120,.4)}
 @media(max-width:1100px){.dashboard-grid{grid-template-columns:1fr}.charts-section{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .app-header{padding:20px 16px}
+  .header-content{flex-direction:column;align-items:stretch;gap:12px}
+  .logo{justify-content:space-between;width:100%}
+  .logo h1{font-size:22px}
+  .logo-icon{font-size:28px}
+  .header-controls{width:100%;gap:8px}
+  .period-selector{width:100%;justify-content:center;flex-wrap:wrap}
+  .period-btn{font-size:12px;padding:6px 10px}
+  .search-input{width:100%;font-size:14px}
+  .quick-actions{display:none}
+  .theme-toggle{display:none}
+  .hamburger-btn{display:flex;align-items:center;justify-content:center;position:absolute;top:20px;right:16px;width:44px;height:44px;font-size:24px}
+  .container{padding:16px 12px 100px}
+  .dashboard-grid{grid-template-columns:1fr;gap:16px}
+  .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .summary-card{padding:16px}
+  .summary-card div:first-child{font-size:13px}
+  .summary-amount{font-size:24px}
+  .card{padding:16px;border-radius:14px}
+  .card-title{font-size:18px}
+  .charts-section{display:none}
+  .transaction-item{padding:12px;flex-direction:column;align-items:flex-start;gap:12px}
+  .transaction-left{width:100%;flex-direction:row;align-items:center;gap:12px}
+  .transaction-icon{width:40px;height:40px;font-size:20px}
+  .transaction-amount{font-size:20px}
+  .floating-add-btn{width:56px;height:56px;font-size:26px;right:16px;bottom:16px}
+  .scroll-buttons{right:16px;bottom:80px;gap:6px}
+  .scroll-btn{width:40px;height:40px;font-size:18px}
+  .modal-content{width:96%;padding:20px;max-height:85vh;border-radius:16px}
+  .category-add{flex-direction:column}
+  .category-add input,.category-add button{width:100%}
+  .category-list{max-height:300px}
+  .transaction-list{max-height:400px}
+  .transaction-filters{width:100%;justify-content:center}
+  .filter-btn{flex:1;text-align:center;font-size:13px;padding:8px 10px}
+}
 </style>
 </head>
 <body>
 <div class="app-header">
   <div class="header-content">
-    <div class="logo"><span class="logo-icon">💎</span><h1>FinanceTracker</h1></div>
+    <div class="logo">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="logo-icon">💎</span>
+        <h1>FinanceTracker</h1>
+      </div>
+      <button class="hamburger-btn" onclick="toggleMobileMenu()">☰</button>
+    </div>
     <div class="header-controls">
       <div class="period-selector">
         <button class="period-btn" onclick="setPeriod('all')">Tümü</button>
@@ -171,6 +223,30 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 </div>
 
 <button class="floating-add-btn" onclick="openModal()">+</button>
+
+<!-- Mobile Menu -->
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMobileMenu()"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-header">
+    <h3>⚙️ Menü</h3>
+    <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
+  </div>
+  <div class="mobile-menu-item" onclick="toggleTheme(); toggleMobileMenu()">
+    <span id="themeIcon">🌙</span> Tema Değiştir
+  </div>
+  <div class="mobile-menu-item" onclick="openGoToDay(); toggleMobileMenu()">
+    🗓️ Güne Git
+  </div>
+  <div class="mobile-menu-item" onclick="openChartsModal(); toggleMobileMenu()">
+    📈 Grafikler
+  </div>
+  <div class="mobile-menu-item" onclick="openTableModal(); toggleMobileMenu()">
+    📋 Tablolar
+  </div>
+  <div class="mobile-menu-item" onclick="openExportModal(); toggleMobileMenu()">
+    📥 Dışa Aktar
+  </div>
+</div>
 
 <!-- Modals -->
 <div class="modal" id="transactionModal"><div class="modal-content"><div class="modal-header"><h2>✨ Yeni İşlem</h2><button class="close-btn" onclick="closeModal()">×</button></div>
@@ -257,12 +333,41 @@ function initApp(){
   if(sc) categories=JSON.parse(sc); if(st) transactions=JSON.parse(st); if(cc) categoryColors=JSON.parse(cc);
   const palette=['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#8E44AD','#3498DB','#E74C3C','#1ABC9C','#C9CBCF','#2ecc71'];
   categories.forEach((c,i)=>{ if(!categoryColors[c]) categoryColors[c]=palette[i%palette.length]; });
-  if(th){ document.documentElement.setAttribute('data-theme',th); document.querySelector('.theme-toggle').textContent = th==='dark'?'☀️':'🌙'; }
+  if(th){ 
+    document.documentElement.setAttribute('data-theme',th); 
+    const icon = th==='dark'?'☀️':'🌙';
+    document.querySelector('.theme-toggle').textContent = icon;
+    document.getElementById('themeIcon').textContent = icon;
+  }
   document.getElementById('transactionDate').valueAsDate=new Date();
   document.getElementById('searchInput').addEventListener('input',e=>{ searchText=e.target.value.trim().toLowerCase(); updateTransactionList(); });
   updateCategoryDropdown(); updateCategoryList(); updateTransactionList(); updateSummary(); updateCharts();
 }
-function toggleTheme(){ const t=document.documentElement.getAttribute('data-theme'); const n=t==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n); localStorage.setItem('theme',n); document.querySelector('.theme-toggle').textContent=n==='dark'?'☀️':'🌙'; updateCharts(); if(modalChartInstance) renderModalChart(); }
+
+function toggleTheme(){ 
+  const t=document.documentElement.getAttribute('data-theme'); 
+  const n=t==='dark'?'light':'dark'; 
+  document.documentElement.setAttribute('data-theme',n); 
+  localStorage.setItem('theme',n); 
+  const icon=n==='dark'?'☀️':'🌙'; 
+  document.querySelector('.theme-toggle').textContent=icon; 
+  document.getElementById('themeIcon').textContent=icon; 
+  updateCharts(); 
+  if(modalChartInstance) renderModalChart(); 
+}
+
+function toggleMobileMenu(){ 
+  const menu=document.getElementById('mobileMenu'); 
+  const overlay=document.getElementById('menuOverlay'); 
+  menu.classList.toggle('active'); 
+  overlay.classList.toggle('active'); 
+  if(menu.classList.contains('active')){ 
+    document.body.style.overflow='hidden'; 
+  } else { 
+    document.body.style.overflow=''; 
+  } 
+}
+
 function setPeriod(p){ currentPeriod=p; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); refreshAll(); }
 function openCustomDateModal(){ const m=document.getElementById('customDateModal'); m.classList.add('active'); document.body.style.overflow='hidden'; const t=new Date(); const f=new Date(t.getFullYear(),t.getMonth(),1); document.getElementById('customStartDate').valueAsDate=f; document.getElementById('customEndDate').valueAsDate=t; }
 function closeCustomDateModal(){ document.getElementById('customDateModal').classList.remove('active'); document.body.style.overflow=''; }
@@ -275,7 +380,6 @@ function applyGoToDay(){ const d=document.getElementById('gotoDate').value; if(!
 function openExportModal(){ document.getElementById('exportModal').classList.add('active'); document.body.style.overflow='hidden'; }
 function closeExportModal(){ document.getElementById('exportModal').classList.remove('active'); document.body.style.overflow=''; }
 
-// CSV helpers: use semicolon delimiter + UTF-8 BOM for Excel TR
 function toCSV(rows, delimiter=';'){
   const esc = (v)=>{
     if(v==null) return '';
@@ -285,7 +389,7 @@ function toCSV(rows, delimiter=';'){
   return rows.map(r=>r.map(esc).join(delimiter)).join('\n');
 }
 function downloadCSV(rows, filename){
-  const bom = '\ufeff'; // UTF-8 BOM so Excel parses UTF-8 + uses ; delimiter mapping
+  const bom = '\ufeff';
   const csv = bom + toCSV(rows, ';');
   download(csv, filename, 'text/csv;charset=utf-8;');
 }
@@ -426,10 +530,10 @@ function download(content,name,type){ const b=new Blob([content],{type}); const 
 function downloadURL(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
 function randColor(){ return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'); }
 function lighten(hex,amount){ try{ const x=parseInt(hex.replace('#',''),16); let r=(x>>16)&255,g=(x>>8)&255,b=x&255; r=Math.round(r+(255-r)*amount); g=Math.round(g+(255-g)*amount); b=Math.round(b+(255-b)*amount); return `rgb(${r}, ${g}, ${b})`; }catch{return hex;} }
-function escapeHtml(s){ return s.replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 window.onclick=e=>{ ['transactionModal','customDateModal','exportModal','confirmModal','editCategoryModal','tableModal','chartsModal','goToDayModal'].forEach(id=>{ const m=document.getElementById(id); if(e.target===m){ m.classList.remove('active'); document.body.style.overflow=''; if(id==='chartsModal' && modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } } }); };
-document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){ e.preventDefault(); openModal(); } if(e.key==='Escape'){ ['transactionModal','customDateModal','exportModal','confirmModal','editCategoryModal','tableModal','chartsModal','goToDayModal'].forEach(id=>document.getElementById(id).classList.remove('active')); document.body.style.overflow=''; if(modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } } if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){ e.preventDefault(); document.getElementById('searchInput').focus(); } });
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){ e.preventDefault(); openModal(); } if(e.key==='Escape'){ ['transactionModal','customDateModal','exportModal','confirmModal','editCategoryModal','tableModal','chartsModal','goToDayModal'].forEach(id=>document.getElementById(id).classList.remove('active')); document.body.style.overflow=''; if(modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } const menu=document.getElementById('mobileMenu'); const overlay=document.getElementById('menuOverlay'); if(menu.classList.contains('active')){ menu.classList.remove('active'); overlay.classList.remove('active'); } } if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){ e.preventDefault(); document.getElementById('searchInput').focus(); } });
 
 initApp();
 </script>
