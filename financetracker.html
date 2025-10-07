@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gelir-Gider Takip Pro — Geliştirilmiş v3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+ --bg-gradient-start:#667eea;--bg-gradient-end:#764ba2;
+ --bg-primary:#f7f9fc;--bg-secondary:#fff;--bg-card:#fff;
+ --text-primary:#2d3748;--text-secondary:#718096;--border-color:#e2e8f0;
+ --success:#48bb78;--success-light:#c6f6d5;--danger:#f56565;--danger-light:#fed7d7;
+ --warning:#ed8936;--warning-light:#feebc8;--primary:#667eea;--primary-light:#e9d8fd;
+ --shadow:rgba(0,0,0,.1);--shadow-lg:rgba(0,0,0,.15)
+}
+[data-theme=dark]{--bg-primary:#0f1419;--bg-secondary:#1a202c;--bg-card:#2d3748;--text-primary:#f7fafc;--text-secondary:#a0aec0;--border-color:#4a5568;--shadow:rgba(0,0,0,.3);--shadow-lg:rgba(0,0,0,.5)}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:.3s;line-height:1.6}
+.app-header{background:linear-gradient(135deg,var(--bg-gradient-start),var(--bg-gradient-end));padding:40px 20px;box-shadow:0 10px 40px var(--shadow-lg);position:sticky;top:0;z-index:100}
+.header-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.logo{display:flex;align-items:center;gap:12px;color:#fff}
+.logo h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.logo-icon{font-size:36px}
+.header-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.theme-toggle{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:22px;transition:.3s;color:#fff;min-width:48px}
+.theme-toggle:hover{background:rgba(255,255,255,.3);transform:scale(1.05)}
+.period-selector{display:flex;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:6px;border-radius:12px;flex-wrap:wrap}
+.period-btn{background:transparent;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;transition:.3s;white-space:nowrap}
+.period-btn:hover{background:rgba(255,255,255,.2)}
+.period-btn.active{background:#fff;color:var(--primary);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.25s;display:inline-flex;align-items:center;gap:8px;justify-content:center;box-shadow:0 4px 12px var(--shadow)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{filter:brightness(.95);transform:translateY(-1px)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.2);color:#fff}
+.container{max-width:1400px;margin:0 auto;padding:28px 20px 100px}
+.dashboard-grid{display:grid;grid-template-columns:300px 1fr;gap:26px;margin-bottom:26px}
+.sidebar{display:flex;flex-direction:column;gap:18px}
+.summary-cards{display:flex;flex-direction:column;gap:12px}
+.summary-card{background:var(--bg-card);padding:22px;border-radius:18px;box-shadow:0 4px 20px var(--shadow);border-left:5px solid;position:relative;overflow:hidden;transition:.25s}
+.summary-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow-lg)}
+.summary-card.income{border-color:var(--success);color:var(--success)}
+.summary-card.expense{border-color:var(--danger);color:var(--danger)}
+.summary-card.balance{border-color:var(--primary);color:var(--primary)}
+.summary-amount{font-size:32px;font-weight:800;color:var(--text-primary);margin-top:6px}
+.card{background:var(--bg-card);border-radius:18px;padding:24px;box-shadow:0 4px 20px var(--shadow)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border-color)}
+.card-title{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800}
+.category-add{display:flex;gap:8px;margin-bottom:16px}
+.category-add input{flex:1;padding:12px 14px;border:2px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary)}
+.category-add input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-light)}
+.category-list{display:flex;flex-direction:column;gap:10px;max-height:460px;overflow:auto;padding-right:8px}
+.category-item{background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.category-info{display:flex;align-items:center;gap:10px;flex:1}
+.category-color{width:14px;height:14px;border-radius:4px;border:2px solid var(--border-color)}
+.category-name{font-weight:700}
+.category-amount{margin-left:auto;font-weight:800;color:var(--danger)}
+.icon-btn{background:var(--bg-secondary);border:2px solid var(--border-color);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:16px;display:grid;place-items:center}
+.icon-btn:hover{transform:scale(1.08)}
+.icon-btn.delete:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+.icon-btn.edit:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.search-input{padding:10px 12px;border:2px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary);min-width:240px}
+.transaction-section{background:var(--bg-card);border-radius:18px;padding:24px;box-shadow:0 4px 20px var(--shadow)}
+.transaction-filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:8px 14px;border:2px solid var(--border-color);background:var(--bg-secondary);border-radius:10px;font-weight:700}
+.filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.transaction-list{display:flex;flex-direction:column;gap:10px;max-height:560px;overflow:auto;padding-right:8px}
+.transaction-item{background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;position:relative}
+.transaction-left{display:flex;align-items:center;gap:16px;flex:1}
+.transaction-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.transaction-icon.income{background:var(--success-light);color:var(--success)}
+.transaction-icon.expense{background:var(--danger-light);color:var(--danger)}
+.transaction-meta{display:flex;gap:10px;flex-wrap:wrap}
+.transaction-category-badge{padding:3px 10px;border-radius:8px;font-size:12px;font-weight:800}
+.transaction-amount{font-size:22px;font-weight:800}
+.transaction-amount.income{color:var(--success)}
+.transaction-amount.expense{color:var(--danger)}
+.charts-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:22px}
+.chart-card{background:var(--bg-card);padding:24px;border-radius:18px;box-shadow:0 4px 20px var(--shadow)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:2000;align-items:center;justify-content:center;animation:fadeIn .25s ease}
+.modal.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-content{background:var(--bg-card);padding:30px;border-radius:22px;max-width:760px;width:92%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.close-btn{background:var(--bg-secondary);border:none;width:40px;height:40px;border-radius:10px;font-size:22px;color:var(--text-secondary);cursor:pointer}
+.close-btn:hover{background:var(--danger);color:#fff}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;margin-bottom:6px;color:var(--text-secondary);font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border:2px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary)}
+.notification{position:fixed;top:90px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:12px;font-weight:800;color:#fff;z-index:3000;box-shadow:0 8px 30px rgba(0,0,0,.3);animation:slideDown .2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes slideUp{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(-16px)}}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid var(--border-color);text-align:left}
+.table th{background:var(--primary);color:#fff;position:sticky;top:0}
+.scroll-buttons{position:fixed;right:24px;bottom:110px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.scroll-btn{width:46px;height:46px;border-radius:50%;background:var(--bg-card);border:2px solid var(--border-color);font-size:22px;cursor:pointer}
+.floating-add-btn{position:fixed;right:24px;bottom:24px;width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--success),#38a169);border:none;color:#fff;font-size:30px;cursor:pointer;box-shadow:0 8px 30px rgba(72,187,120,.4)}
+@media(max-width:1100px){.dashboard-grid{grid-template-columns:1fr}.charts-section{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="header-content">
+    <div class="logo"><span class="logo-icon">💎</span><h1>FinanceTracker</h1></div>
+    <div class="header-controls">
+      <div class="period-selector">
+        <button class="period-btn" onclick="setPeriod('all')">Tümü</button>
+        <button class="period-btn" onclick="setPeriod('week')">Bu Hafta</button>
+        <button class="period-btn active" onclick="setPeriod('month')">Bu Ay</button>
+        <button class="period-btn" onclick="setPeriod('year')">Bu Yıl</button>
+        <button class="period-btn" onclick="openCustomDateModal()">📅 Özel</button>
+      </div>
+      <input class="search-input" id="searchInput" placeholder="İşlem veya kategori ara..." />
+      <div class="quick-actions">
+        <button class="btn btn-ghost" onclick="openGoToDay()">🗓️ Güne Git</button>
+        <button class="btn btn-ghost" onclick="openChartsModal()">📈 Grafikler</button>
+        <button class="btn btn-ghost" onclick="openTableModal()">📋 Tablolar</button>
+        <button class="btn btn-primary" onclick="openExportModal()">📥 Dışa Aktar</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="dashboard-grid">
+    <div class="sidebar">
+      <div class="summary-cards">
+        <div class="summary-card income"><div>💰 Toplam Gelir</div><div class="summary-amount" id="totalIncome">₺0.00</div></div>
+        <div class="summary-card expense"><div>💸 Toplam Gider</div><div class="summary-amount" id="totalExpense">₺0.00</div></div>
+        <div class="summary-card balance"><div>💵 Net Bakiye</div><div class="summary-amount" id="balance">₺0.00</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏷️ Kategoriler</div></div>
+        <div class="category-add">
+          <input type="text" id="newCategory" placeholder="Yeni kategori ekle..." />
+          <button class="btn btn-primary" onclick="addCategory()">➕</button>
+        </div>
+        <div class="category-list" id="categoryList"></div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 İşlem Geçmişi</div>
+          <div class="transaction-filters">
+            <button class="filter-btn active" onclick="filterTransactions('all')">Tümü</button>
+            <button class="filter-btn" onclick="filterTransactions('income')">Gelirler</button>
+            <button class="filter-btn" onclick="filterTransactions('expense')">Giderler</button>
+          </div>
+        </div>
+        <div class="transaction-list" id="transactionList"></div>
+      </div>
+
+      <div class="charts-section">
+        <div class="chart-card"><h3>📈 Kategori Dağılımı</h3><canvas id="pieChart"></canvas></div>
+        <div class="chart-card"><h3>📊 Harcama Karşılaştırması</h3><canvas id="barChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-buttons">
+  <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+  <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">↓</button>
+</div>
+
+<button class="floating-add-btn" onclick="openModal()">+</button>
+
+<!-- Modals -->
+<div class="modal" id="transactionModal"><div class="modal-content"><div class="modal-header"><h2>✨ Yeni İşlem</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+<form onsubmit="addTransaction(event)">
+  <div class="form-group"><label>İşlem Türü</label><select id="transactionType" required><option value="expense">💸 Gider</option><option value="income">💰 Gelir</option></select></div>
+  <div class="form-group"><label>Tarih</label><input type="date" id="transactionDate" required /></div>
+  <div class="form-group"><label>Miktar (₺)</label><input type="number" id="transactionAmount" placeholder="0.00" step="0.01" min="0.01" required /></div>
+  <div class="form-group"><label>Kategori</label><select id="transactionCategory" required></select></div>
+  <div class="form-group"><label>Açıklama</label><textarea id="transactionDescription" placeholder="İşlem detayları..."></textarea></div>
+  <button type="submit" class="btn btn-success" style="width:100%">💾 İşlemi Kaydet</button>
+</form></div></div>
+
+<div class="modal" id="customDateModal"><div class="modal-content"><div class="modal-header"><h2>📅 Özel Tarih Aralığı</h2><button class="close-btn" onclick="closeCustomDateModal()">×</button></div>
+<div class="form-group"><label>Başlangıç Tarihi</label><input type="date" id="customStartDate" /></div>
+<div class="form-group"><label>Bitiş Tarihi</label><input type="date" id="customEndDate" /></div>
+<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="closeCustomDateModal()">İptal</button><button class="btn btn-success" onclick="applyCustomDate()">✅ Uygula</button></div>
+</div></div>
+
+<div class="modal" id="goToDayModal"><div class="modal-content"><div class="modal-header"><h2>🗓️ Belirli Güne Git</h2><button class="close-btn" onclick="closeGoToDay()">×</button></div>
+<div class="form-group"><label>Tarih</label><input type="date" id="gotoDate" /></div>
+<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="closeGoToDay()">İptal</button><button class="btn btn-success" onclick="applyGoToDay()">Git</button></div>
+</div></div>
+
+<div class="modal" id="tableModal"><div class="modal-content"><div class="modal-header"><h2>📋 İşlem Tablosu</h2><button class="close-btn" onclick="closeTableModal()">×</button></div>
+<div style="overflow:auto;max-height:70vh">
+  <table class="table" id="tableView"><thead><tr><th>Tarih</th><th>Açıklama</th><th>Kategori</th><th>Tür</th><th>Miktar</th></tr></thead><tbody></tbody></table>
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+  <button class="btn" onclick="printTable()">🖨️ Yazdır / PDF</button>
+  <button class="btn btn-primary" onclick="exportTableCSV()">📊 CSV</button>
+</div>
+</div></div>
+
+<div class="modal" id="chartsModal"><div class="modal-content"><div class="modal-header"><h2>📈 Grafikler Paneli</h2><button class="close-btn" onclick="closeChartsModal()">×</button></div>
+<div class="form-group"><label>Grafik Türü</label>
+  <select id="chartTypePicker" onchange="renderModalChart()">
+    <option value="doughnut">Pasta (Kategori Payları)</option>
+    <option value="bar">Çubuk (Kategori Karşılaştırma)</option>
+    <option value="line">Çizgi (Günlük Gider Trend)</option>
+  </select>
+</div>
+<canvas id="modalChart" style="max-height:420px"></canvas>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+  <button class="btn btn-primary" onclick="downloadModalChartPNG()">🖼️ PNG İndir</button>
+</div>
+</div></div>
+
+<div class="modal" id="exportModal"><div class="modal-content"><div class="modal-header"><h2>📥 Dışa Aktar & Yedek</h2><button class="close-btn" onclick="closeExportModal()">×</button></div>
+<p style="margin-bottom:10px;color:var(--text-secondary)">İşlemlerinizi dışa aktarabilir, rapor yazdırabilir, yedek alabilir veya geri yükleyebilirsiniz.</p>
+<div style="display:grid;gap:8px">
+  <button class="btn btn-primary" onclick="exportToCSV()">📊 CSV Olarak İndir</button>
+  <button class="btn btn-primary" onclick="exportToJSON()">📄 JSON Olarak İndir</button>
+  <button class="btn" onclick="printReport()">🖨️ Rapor Yazdır / PDF</button>
+  <button class="btn btn-primary" onclick="backupAll()">🧰 Veriyi Yedekle</button>
+  <label class="btn btn-success" for="restoreInput" style="cursor:pointer">♻️ Yedekten Geri Yükle</label>
+  <input id="restoreInput" type="file" accept=".json" style="display:none" onchange="restoreAll(this.files[0])" />
+  <button class="btn btn-danger" onclick="hardReset()">🧹 Tüm Veriyi Sıfırla</button>
+</div>
+</div></div>
+
+<div class="modal" id="confirmModal"><div class="modal-content"><div class="modal-header"><h2 id="confirmTitle">Onay</h2><button class="close-btn" onclick="closeConfirmModal()">×</button></div>
+<div id="confirmBody" style="margin-bottom:12px"></div>
+<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="closeConfirmModal()">İptal</button><button class="btn btn-danger" id="confirmOkBtn">Evet</button></div>
+</div></div>
+
+<div class="modal" id="editCategoryModal"><div class="modal-content"><div class="modal-header"><h2>🖋️ Kategori Düzenle</h2><button class="close-btn" onclick="closeEditCategoryModal()">×</button></div>
+<div class="form-group"><label>Yeni Ad</label><input type="text" id="editCategoryName" /></div>
+<div class="form-group"><label>Renk</label><input type="color" id="editCategoryColor" /></div>
+<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="closeEditCategoryModal()">İptal</button><button class="btn btn-success" onclick="applyEditCategory()">Kaydet</button></div>
+</div></div>
+
+<script>
+let categories=['Market','Ulaşım','Faturalar','Eğlence','Sağlık','Kira','Giyim','Yemek','Eğitim','Diğer'];
+let categoryColors={};
+let transactions=[];
+let currentPeriod='month';
+let currentFilter='all';
+let pieChart,barChart,modalChartInstance;
+let searchText='';
+let _editCategoryOldName=null;
+
+function initApp(){
+  const sc=localStorage.getItem('categories'); const st=localStorage.getItem('transactions'); const th=localStorage.getItem('theme'); const cc=localStorage.getItem('categoryColors');
+  if(sc) categories=JSON.parse(sc); if(st) transactions=JSON.parse(st); if(cc) categoryColors=JSON.parse(cc);
+  const palette=['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#8E44AD','#3498DB','#E74C3C','#1ABC9C','#C9CBCF','#2ecc71'];
+  categories.forEach((c,i)=>{ if(!categoryColors[c]) categoryColors[c]=palette[i%palette.length]; });
+  if(th){ document.documentElement.setAttribute('data-theme',th); document.querySelector('.theme-toggle').textContent = th==='dark'?'☀️':'🌙'; }
+  document.getElementById('transactionDate').valueAsDate=new Date();
+  document.getElementById('searchInput').addEventListener('input',e=>{ searchText=e.target.value.trim().toLowerCase(); updateTransactionList(); });
+  updateCategoryDropdown(); updateCategoryList(); updateTransactionList(); updateSummary(); updateCharts();
+}
+function toggleTheme(){ const t=document.documentElement.getAttribute('data-theme'); const n=t==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n); localStorage.setItem('theme',n); document.querySelector('.theme-toggle').textContent=n==='dark'?'☀️':'🌙'; updateCharts(); if(modalChartInstance) renderModalChart(); }
+function setPeriod(p){ currentPeriod=p; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); refreshAll(); }
+function openCustomDateModal(){ const m=document.getElementById('customDateModal'); m.classList.add('active'); document.body.style.overflow='hidden'; const t=new Date(); const f=new Date(t.getFullYear(),t.getMonth(),1); document.getElementById('customStartDate').valueAsDate=f; document.getElementById('customEndDate').valueAsDate=t; }
+function closeCustomDateModal(){ document.getElementById('customDateModal').classList.remove('active'); document.body.style.overflow=''; }
+function applyCustomDate(){ const s=document.getElementById('customStartDate').value; const e=document.getElementById('customEndDate').value; if(!s||!e) return toast('Tarih seçin!','warning'); if(new Date(s)>new Date(e)) return toast('Başlangıç bitişten sonra!','error'); currentPeriod={start:s,end:e}; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); refreshAll(); closeCustomDateModal(); toast(`📅 ${new Date(s).toLocaleDateString('tr-TR')} - ${new Date(e).toLocaleDateString('tr-TR')}`); }
+
+function openGoToDay(){ document.getElementById('goToDayModal').classList.add('active'); document.body.style.overflow='hidden'; document.getElementById('gotoDate').valueAsDate=new Date(); }
+function closeGoToDay(){ document.getElementById('goToDayModal').classList.remove('active'); document.body.style.overflow=''; }
+function applyGoToDay(){ const d=document.getElementById('gotoDate').value; if(!d) return toast('Tarih seçin!','warning'); currentPeriod={start:d,end:d}; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); refreshAll(); closeGoToDay(); toast(`🗓️ ${new Date(d).toLocaleDateString('tr-TR')} günü gösteriliyor`); }
+
+function openExportModal(){ document.getElementById('exportModal').classList.add('active'); document.body.style.overflow='hidden'; }
+function closeExportModal(){ document.getElementById('exportModal').classList.remove('active'); document.body.style.overflow=''; }
+
+// CSV helpers: use semicolon delimiter + UTF-8 BOM for Excel TR
+function toCSV(rows, delimiter=';'){
+  const esc = (v)=>{
+    if(v==null) return '';
+    const s=String(v).replace(/"/g,'""');
+    return `"${s}"`;
+  };
+  return rows.map(r=>r.map(esc).join(delimiter)).join('\n');
+}
+function downloadCSV(rows, filename){
+  const bom = '\ufeff'; // UTF-8 BOM so Excel parses UTF-8 + uses ; delimiter mapping
+  const csv = bom + toCSV(rows, ';');
+  download(csv, filename, 'text/csv;charset=utf-8;');
+}
+
+function exportToCSV(){
+  const f=getFiltered(); if(!f.length) return toast('Dışa aktarılacak işlem yok!','warning');
+  const rows=[['Tarih','Tür','Kategori','Açıklama','Miktar']];
+  f.forEach(t=>rows.push([t.date, t.type==='income'?'Gelir':'Gider', t.category, t.description||'', t.amount]));
+  downloadCSV(rows,'gelir-gider-raporu.csv'); toast('📊 CSV indirildi');
+}
+function exportToJSON(){ const f=getFiltered(); if(!f.length) return toast('Dışa aktarılacak işlem yok!','warning'); download(JSON.stringify(f,null,2),'gelir-gider-raporu.json','application/json'); toast('📄 JSON indirildi'); }
+function printReport(){
+  const f=getFiltered(); if(!f.length) return toast('Yazdırılacak işlem yok!','warning');
+  const totalIncome=f.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExpense=f.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  let html = `
+    <html><head><title>Gelir-Gider Raporu</title>
+    <style>
+      body{font-family:Arial, sans-serif; padding:24px}
+      h1{color:#667eea;border-bottom:3px solid #667eea;padding-bottom:8px}
+      .summary{background:#f0f0f0;padding:14px;margin:16px 0;border-radius:8px}
+      table{width:100%;border-collapse:collapse;margin-top:12px}
+      th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+      th{background:#667eea;color:#fff}
+      .income{color:#28a745;font-weight:bold}
+      .expense{color:#dc3545;font-weight:bold}
+      @media print {.no-print{display:none}}
+    </style></head><body>
+    <h1>💎 FinanceTracker - Rapor</h1>
+    <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</p>
+    <div class="summary">
+      <p><strong>Toplam Gelir:</strong> <span class="income">₺${totalIncome.toFixed(2)}</span></p>
+      <p><strong>Toplam Gider:</strong> <span class="expense">₺${totalExpense.toFixed(2)}</span></p>
+      <p><strong>Net Bakiye:</strong> ₺${(totalIncome-totalExpense).toFixed(2)}</p>
+      <p><strong>İşlem Sayısı:</strong> ${f.length}</p>
+    </div>
+    <table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Kategori</th><th>Tür</th><th>Miktar</th></tr></thead><tbody>`;
+  f.forEach(t=>{ html+=`<tr><td>${new Date(t.date).toLocaleDateString('tr-TR')}</td><td>${escapeHtml(t.description||'')}</td><td>${t.category}</td><td>${t.type==='income'?'Gelir':'Gider'}</td><td class="${t.type}">${t.type==='income'?'+':'-'}₺${t.amount.toFixed(2)}</td></tr>`; });
+  html+=`</tbody></table></body></html>`;
+  const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.focus(); setTimeout(()=>w.print(),200);
+}
+
+function backupAll(){ const payload={categories,transactions,categoryColors,theme:document.documentElement.getAttribute('data-theme')||'light',ts:Date.now()}; download(JSON.stringify(payload,null,2),'financetracker_yedek.json','application/json'); toast('🧰 Yedek oluşturuldu'); }
+function restoreAll(file){ if(!file) return; const r=new FileReader(); r.onload=e=>{ try{ const o=JSON.parse(e.target.result); if(!o.categories||!o.transactions) throw new Error(); categories=o.categories; transactions=o.transactions; categoryColors=o.categoryColors||{}; if(o.theme){ document.documentElement.setAttribute('data-theme',o.theme); localStorage.setItem('theme',o.theme); } persist(); refreshAll(); toast('♻️ Yedek geri yüklendi'); closeExportModal(); }catch{ toast('Yedek yüklenemedi','error'); } }; r.readAsText(file); }
+function hardReset(){ openConfirm('Sıfırlama','Tüm veriler silinsin mi?',()=>{ localStorage.clear(); categories=[]; transactions=[]; categoryColors={}; refreshAll(); toast('🧹 Sıfırlandı'); closeExportModal();}); }
+
+function filterTransactions(f){ currentFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); updateTransactionList(); }
+function getFiltered(){
+  let f=[...transactions]; const now=new Date(); now.setHours(0,0,0,0);
+  if(currentPeriod==='week'){ const t=new Date(now); const dow=t.getDay(); const diff=dow===0?-6:1-dow; const mon=new Date(t); mon.setDate(t.getDate()+diff); mon.setHours(0,0,0,0); f=f.filter(x=>{ const d=new Date(x.date); d.setHours(0,0,0,0); return d>=mon&&d<=now; }); }
+  else if(currentPeriod==='month'){ f=f.filter(x=>{ const d=new Date(x.date); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }); }
+  else if(currentPeriod==='year'){ f=f.filter(x=>{ const d=new Date(x.date); return d.getFullYear()===now.getFullYear(); }); }
+  else if(typeof currentPeriod==='object' && currentPeriod.start && currentPeriod.end){ const s=new Date(currentPeriod.start); s.setHours(0,0,0,0); const e=new Date(currentPeriod.end); e.setHours(23,59,59,999); f=f.filter(x=>{ const d=new Date(x.date); return d>=s&&d<=e; }); }
+  if(currentFilter!=='all') f=f.filter(t=>t.type===currentFilter);
+  if(searchText) f=f.filter(t=>(t.description||'').toLowerCase().includes(searchText) || (t.category||'').toLowerCase().includes(searchText));
+  return f;
+}
+
+function addCategory(){ const el=document.getElementById('newCategory'); const name=el.value.trim(); if(!name) return toast('Kategori adı boş olamaz','error'); if(categories.includes(name)) return toast('Kategori zaten var','warning'); categories.push(name); categoryColors[name]=randColor(); persist(); updateCategoryList(); updateCategoryDropdown(); el.value=''; toast(`"${name}" eklendi`); }
+function editCategory(n){ _editCategoryOldName=n; document.getElementById('editCategoryName').value=n; document.getElementById('editCategoryColor').value=categoryColors[n]||'#3498db'; document.getElementById('editCategoryModal').classList.add('active'); document.body.style.overflow='hidden'; }
+function closeEditCategoryModal(){ document.getElementById('editCategoryModal').classList.remove('active'); document.body.style.overflow=''; }
+function applyEditCategory(){ const newName=document.getElementById('editCategoryName').value.trim(); const newColor=document.getElementById('editCategoryColor').value; if(!newName) return toast('Yeni ad boş olamaz','error'); if(newName!==_editCategoryOldName && categories.includes(newName)) return toast('Bu ad zaten var','warning'); categories=categories.map(c=>c===_editCategoryOldName?newName:c); transactions=transactions.map(t=>({...t,category:t.category===_editCategoryOldName?newName:t.category})); const old=categoryColors[_editCategoryOldName]; delete categoryColors[_editCategoryOldName]; categoryColors[newName]=newColor||old; persist(); refreshAll(); closeEditCategoryModal(); toast(`Kategori güncellendi: "${_editCategoryOldName}" → "${newName}"`); _editCategoryOldName=null; }
+function deleteCategory(n){
+  const related=transactions.filter(t=>t.category===n).length; const others=categories.filter(c=>c!==n);
+  let body=''; if(related){ const opts=others.map(o=>`<option value="${o}">${o}</option>`).join(''); body=`"<b>${n}</b>" kategorisine ait <b>${related}</b> işlem var.<div class="form-group" style="margin-top:8px"><label>İşlemler</label><select id="deleteCatMode"><option value="move" ${others.length?'selected':''}>Taşı</option><option value="delete">Sil</option></select></div><div class="form-group" id="moveGroup"><label>Hedef</label><select id="moveTarget">${opts||'<option value="">Yok</option>'}</select></div>`; }
+  else body=`"<b>${n}</b>" kategorisini silmek istiyor musunuz?`;
+  openConfirm('Kategoriyi Sil',body,()=>{
+    if(related){ const mode=document.getElementById('deleteCatMode').value; if(mode==='move'){ const target=document.getElementById('moveTarget').value; if(!target) return toast('Hedef kategori seçin','warning'); transactions=transactions.map(t=>t.category===n?{...t,category:target}:t); } else { transactions=transactions.filter(t=>t.category!==n); } }
+    categories=categories.filter(c=>c!==n); delete categoryColors[n]; persist(); refreshAll(); toast(`🗑️ "${n}" silindi`);
+  });
+}
+
+function updateCategoryList(){
+  const c=document.getElementById('categoryList'); if(!categories.length){ c.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:24px">Henüz kategori yok</div>'; return; }
+  const f=getFiltered(); c.innerHTML=categories.map(cat=>{ const total=f.filter(t=>t.category===cat && t.type==='expense').reduce((s,t)=>s+t.amount,0); const color=categoryColors[cat]||'#C9CBCF'; return `<div class="category-item"><div class="category-info"><span class="category-color" style="background:${color}"></span><span class="category-name">${cat}</span><span class="category-amount">₺${total.toFixed(2)}</span></div><div style="display:flex;gap:6px"><button class="icon-btn edit" title="Düzenle" onclick="editCategory('${cat.replace(/'/g,"\\'")}')">🖋️</button><button class="icon-btn delete" title="Sil" onclick="deleteCategory('${cat.replace(/'/g,"\\'")}')">🗑️</button></div></div>`; }).join('');
+}
+function updateCategoryDropdown(){ const s=document.getElementById('transactionCategory'); s.innerHTML=categories.length? categories.map(c=>`<option value="${c}">${c}</option>`).join('') : '<option value="">Kategori yok</option>'; }
+
+function openModal(){ document.getElementById('transactionModal').classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(){ document.getElementById('transactionModal').classList.remove('active'); document.body.style.overflow=''; }
+function addTransaction(e){ e.preventDefault(); const type=document.getElementById('transactionType').value; const date=document.getElementById('transactionDate').value; const amount=parseFloat(document.getElementById('transactionAmount').value); const category=document.getElementById('transactionCategory').value; const description=document.getElementById('transactionDescription').value; if(!date) return toast('Tarih seçin','error'); if(!amount||amount<=0) return toast('Geçerli miktar girin','error'); if(!category) return toast('Kategori seçin','error'); transactions.unshift({id:Date.now(),type,date,amount,category,description:description|| (type==='income'?'Gelir':'Gider')}); persist(); refreshAll(); closeModal(); document.getElementById('transactionAmount').value=''; document.getElementById('transactionDescription').value=''; document.getElementById('transactionDate').valueAsDate=new Date(); toast(`✅ ${type==='income'?'Gelir':'Gider'} eklendi: ₺${amount.toFixed(2)}`); }
+function deleteTransaction(id){ const t=transactions.find(x=>x.id===id); openConfirm('İşlemi Sil',`<p><b>${t?(t.description||'İşlem'):''}</b> silinsin mi?</p>`,()=>{ transactions=transactions.filter(x=>x.id!==id); persist(); refreshAll(); toast('🗑️ Silindi'); }); }
+
+function updateTransactionList(){
+  const c=document.getElementById('transactionList'); const f=getFiltered(); if(!f.length){ c.innerHTML='<div style="text-align:center;color:var(--text-secondary);padding:40px">Henüz işlem yok • + ile ekle</div>'; return; }
+  c.innerHTML=f.map(t=>`<div class="transaction-item"><div class="transaction-left"><div class="transaction-icon ${t.type}">${t.type==='income'?'💰':'💸'}</div><div><div style="font-weight:800">${escapeHtml(t.description||'')}</div><div class="transaction-meta"><span>${new Date(t.date).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}</span><span class="transaction-category-badge" style="background:${lighten(categoryColors[t.category]||'#667eea',.7)};color:${categoryColors[t.category]||'#667eea'}">${t.category}</span></div></div></div><div style="display:flex;align-items:center;gap:10px"><div class="transaction-amount ${t.type}">${t.type==='income'?'+':'-'}₺${t.amount.toFixed(2)}</div><button class="icon-btn delete" onclick="deleteTransaction(${t.id})">🗑️</button></div></div>`).join('');
+}
+
+function updateSummary(){ const f=getFiltered(); const inc=f.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0); const exp=f.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0); document.getElementById('totalIncome').textContent='₺'+inc.toFixed(2); document.getElementById('totalExpense').textContent='₺'+exp.toFixed(2); document.getElementById('balance').textContent='₺'+(inc-exp).toFixed(2); }
+
+function updateCharts(){
+  const f=getFiltered(); const exp=f.filter(t=>t.type==='expense');
+  const totals={}; exp.forEach(t=>totals[t.category]=(totals[t.category]||0)+t.amount);
+  const labels=Object.keys(totals); const data=Object.values(totals); const colors=labels.map(l=>categoryColors[l]||'#C9CBCF');
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark'; const textColor=isDark?'#f7fafc':'#2d3748'; const gridColor=isDark?'#4a5568':'#e2e8f0';
+  if(pieChart) pieChart.destroy(); if(barChart) barChart.destroy();
+  pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:3,borderColor:isDark?'#2d3748':'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{color:textColor}}}}});
+  barChart=new Chart(document.getElementById('barChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Harcama (₺)',data,backgroundColor:colors,borderRadius:10}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{color:textColor,callback:v=>'₺'+v},grid:{color:gridColor}},x:{ticks:{color:textColor},grid:{display:false}}}}});
+}
+
+function openChartsModal(){ document.getElementById('chartsModal').classList.add('active'); document.body.style.overflow='hidden'; renderModalChart(); }
+function closeChartsModal(){ document.getElementById('chartsModal').classList.remove('active'); document.body.style.overflow=''; if(modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } }
+function renderModalChart(){
+  const ctx=document.getElementById('modalChart').getContext('2d'); const type=document.getElementById('chartTypePicker').value;
+  if(modalChartInstance) modalChartInstance.destroy();
+  const f=getFiltered();
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark'; const textColor=isDark?'#f7fafc':'#2d3748'; const gridColor=isDark?'#4a5568':'#e2e8f0';
+  if(type==='line'){
+    const daysMap={}; f.filter(x=>x.type==='expense').forEach(t=>{ const d=new Date(t.date); d.setHours(0,0,0,0); const key=d.toISOString().slice(0,10); daysMap[key]=(daysMap[key]||0)+t.amount; });
+    const labels=Object.keys(daysMap).sort(); const data=labels.map(k=>daysMap[k]);
+    modalChartInstance=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Günlük Gider',data,fill:false}]},options:{plugins:{legend:{labels:{color:textColor}}},scales:{y:{beginAtZero:true,ticks:{color:textColor},grid:{color:gridColor}},x:{ticks:{color:textColor},grid:{display:false}}}}});
+  } else {
+    const exp=f.filter(t=>t.type==='expense'); const totals={}; exp.forEach(t=>totals[t.category]=(totals[t.category]||0)+t.amount); const labels=Object.keys(totals); const data=Object.values(totals); const colors=labels.map(l=>categoryColors[l]||'#C9CBCF');
+    modalChartInstance=new Chart(ctx,{type:type, data:{labels,datasets:[{label:type==='bar'?'Harcama (₺)':'Kategori Payı',data,backgroundColor:colors,borderWidth:type==='doughnut'?3:0,borderColor:isDark?'#2d3748':'#fff'}]}, options:{plugins:{legend:{labels:{color:textColor}}},scales: type==='bar'? {y:{beginAtZero:true,ticks:{color:textColor},grid:{color:gridColor}},x:{ticks:{color:textColor},grid:{display:false}}} : {}}});
+  }
+}
+function downloadModalChartPNG(){
+  if(!modalChartInstance) return; const url=modalChartInstance.toBase64Image('image/png',1); downloadURL(url,'grafik.png');
+}
+
+function openTableModal(){ document.getElementById('tableModal').classList.add('active'); document.body.style.overflow='hidden'; renderTable(); }
+function closeTableModal(){ document.getElementById('tableModal').classList.remove('active'); document.body.style.overflow=''; }
+function renderTable(){ const tbody=document.querySelector('#tableView tbody'); const f=getFiltered(); tbody.innerHTML=f.map(t=>`<tr><td>${new Date(t.date).toLocaleDateString('tr-TR')}</td><td>${escapeHtml(t.description||'')}</td><td>${t.category}</td><td>${t.type==='income'?'Gelir':'Gider'}</td><td>${(t.type==='income'?'+':'-')+'₺'+t.amount.toFixed(2)}</td></tr>`).join(''); }
+function exportTableCSV(){
+  const f=getFiltered(); if(!f.length) return toast('Tabloda veri yok','warning');
+  const rows=[['Tarih','Açıklama','Kategori','Tür','Miktar']];
+  f.forEach(t=>rows.push([t.date, t.description||'', t.category, t.type==='income'?'Gelir':'Gider', t.amount]));
+  downloadCSV(rows,'islem_tablosu.csv'); toast('📊 CSV indirildi');
+}
+function printTable(){ const f=getFiltered(); if(!f.length) return toast('Yazdırılacak veri yok','warning'); let html=`<html><head><title>İşlem Tablosu</title><style>body{font-family:Arial;padding:24px} table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left} th{background:#667eea;color:#fff}</style></head><body><h2>📋 İşlem Tablosu</h2><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Kategori</th><th>Tür</th><th>Miktar</th></tr></thead><tbody>`; f.forEach(t=>{ html+=`<tr><td>${new Date(t.date).toLocaleDateString('tr-TR')}</td><td>${escapeHtml(t.description||'')}</td><td>${t.category}</td><td>${t.type==='income'?'Gelir':'Gider'}</td><td>${(t.type==='income'?'+':'-')+'₺'+t.amount.toFixed(2)}</td></tr>`; }); html+='</tbody></table></body></html>'; const w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),200); }
+
+function refreshAll(){ updateCategoryList(); updateTransactionList(); updateSummary(); updateCharts(); }
+function persist(){ localStorage.setItem('categories',JSON.stringify(categories)); localStorage.setItem('transactions',JSON.stringify(transactions)); localStorage.setItem('categoryColors',JSON.stringify(categoryColors)); }
+function toast(msg,type){ const ex=document.querySelector('.notification'); if(ex) ex.remove(); const n=document.createElement('div'); n.className='notification'; n.textContent=msg; n.style.background= type==='error'? 'var(--danger)': type==='warning'? 'var(--warning)': 'var(--success)'; document.body.appendChild(n); setTimeout(()=>{ n.style.animation='slideUp .2s ease'; setTimeout(()=>n.remove(),200); },2200); }
+function openConfirm(title,bodyHtml,onOk){ document.getElementById('confirmTitle').textContent=title; document.getElementById('confirmBody').innerHTML=bodyHtml; const btn=document.getElementById('confirmOkBtn'); btn.onclick=()=>{ onOk(); closeConfirmModal(); }; document.getElementById('confirmModal').classList.add('active'); document.body.style.overflow='hidden'; }
+function closeConfirmModal(){ document.getElementById('confirmModal').classList.remove('active'); document.body.style.overflow=''; }
+function download(content,name,type){ const b=new Blob([content],{type}); const url=URL.createObjectURL(b); downloadURL(url,name); URL.revokeObjectURL(url); }
+function downloadURL(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+function randColor(){ return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'); }
+function lighten(hex,amount){ try{ const x=parseInt(hex.replace('#',''),16); let r=(x>>16)&255,g=(x>>8)&255,b=x&255; r=Math.round(r+(255-r)*amount); g=Math.round(g+(255-g)*amount); b=Math.round(b+(255-b)*amount); return `rgb(${r}, ${g}, ${b})`; }catch{return hex;} }
+function escapeHtml(s){ return s.replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+window.onclick=e=>{ ['transactionModal','customDateModal','exportModal','confirmModal','editCategoryModal','tableModal','chartsModal','goToDayModal'].forEach(id=>{ const m=document.getElementById(id); if(e.target===m){ m.classList.remove('active'); document.body.style.overflow=''; if(id==='chartsModal' && modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } } }); };
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){ e.preventDefault(); openModal(); } if(e.key==='Escape'){ ['transactionModal','customDateModal','exportModal','confirmModal','editCategoryModal','tableModal','chartsModal','goToDayModal'].forEach(id=>document.getElementById(id).classList.remove('active')); document.body.style.overflow=''; if(modalChartInstance){ modalChartInstance.destroy(); modalChartInstance=null; } } if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){ e.preventDefault(); document.getElementById('searchInput').focus(); } });
+
+initApp();
+</script>
+</body>
+</html>
