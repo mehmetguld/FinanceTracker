@@ -7,7 +7,8 @@ import {
   Trash2, 
   Printer, 
   FileSpreadsheet, 
-  FileText
+  FileText,
+  Globe
 } from 'lucide-react';
 import { exportDatabaseBackup, hardResetDatabase, db } from '@/lib/db';
 import { importDataFromJson } from '@/lib/legacy-import';
@@ -22,7 +23,7 @@ interface BackupSettingsProps {
 
 export function BackupSettings({ onRefresh }: BackupSettingsProps) {
   const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -211,6 +212,50 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+      {/* Language Preference Card */}
+      <div className="p-5 sm:p-6 rounded-2xl theme-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-500/20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+            <Globe className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold theme-text">
+              {language === 'tr' ? 'Uygulama Dili / Language' : 'Application Language'}
+            </h3>
+            <p className="text-xs theme-muted">
+              {language === 'tr' 
+                ? 'Tüm menüler, grafikler, tablolar ve raporlar için aktif dil.' 
+                : 'Active language for all menus, charts, tables, and reports.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center p-1 rounded-xl theme-sub-card border theme-border self-start sm:self-auto">
+          <button
+            onClick={() => setLanguage('tr')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+              language === 'tr'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'theme-muted hover:opacity-100'
+            }`}
+          >
+            <span>🇹🇷</span>
+            <span>Türkçe</span>
+          </button>
+          <button
+            onClick={() => setLanguage('en')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+              language === 'en'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'theme-muted hover:opacity-100'
+            }`}
+          >
+            <span>🇬🇧</span>
+            <span>English</span>
+          </button>
+        </div>
+      </div>
+
       {/* Backup and Restore Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Backup Card */}

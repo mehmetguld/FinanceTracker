@@ -6,11 +6,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
+function getActiveLocale(override?: string): string {
+  if (override) return override === 'en' ? 'en-US' : 'tr-TR';
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('finance_tracker_lang') || document.documentElement.lang;
+    return saved === 'en' ? 'en-US' : 'tr-TR';
+  }
+  return 'tr-TR';
+}
+
+export function formatCurrency(amount: number, locale?: string): string {
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
+  const activeLocale = locale || getActiveLocale();
   
-  const formatted = new Intl.NumberFormat('tr-TR', {
+  const formatted = new Intl.NumberFormat(activeLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(absAmount);
@@ -18,20 +28,23 @@ export function formatCurrency(amount: number): string {
   return `${isNegative ? '-' : ''}₺${formatted}`;
 }
 
-export function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string, locale?: string): string {
   if (!dateStr) return '';
   const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('tr-TR', {
+  const activeLocale = locale || getActiveLocale();
+  return new Intl.DateTimeFormat(activeLocale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(date);
 }
 
-export function formatRelativeDate(dateStr: string): string {
+export function formatRelativeDate(dateStr: string, locale?: string): string {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   const today = new Date();
+  const activeLocale = locale || getActiveLocale();
+  const isEn = activeLocale.startsWith('en');
   
   const isToday = 
     date.getDate() === today.getDate() &&
@@ -45,10 +58,10 @@ export function formatRelativeDate(dateStr: string): string {
     date.getMonth() === yesterday.getMonth() &&
     date.getFullYear() === yesterday.getFullYear();
 
-  if (isToday) return 'Bugün';
-  if (isYesterday) return 'Dün';
+  if (isToday) return isEn ? 'Today' : 'Bugün';
+  if (isYesterday) return isEn ? 'Yesterday' : 'Dün';
 
-  return formatDate(dateStr);
+  return formatDate(dateStr, locale);
 }
 
 export function getCurrentYearMonth(): string {
@@ -58,14 +71,15 @@ export function getCurrentYearMonth(): string {
   return `${year}-${month}`;
 }
 
-export function formatMonthName(yearMonth: string): string {
+export function formatMonthName(yearMonth: string, locale?: string): string {
   if (!yearMonth) return '';
   const [yearStr, monthStr] = yearMonth.split('-');
   const year = parseInt(yearStr, 10);
   const month = parseInt(monthStr, 10) - 1;
   const date = new Date(year, month, 1);
+  const activeLocale = locale || getActiveLocale();
   
-  return new Intl.DateTimeFormat('tr-TR', {
+  return new Intl.DateTimeFormat(activeLocale, {
     month: 'long',
     year: 'numeric',
   }).format(date);
