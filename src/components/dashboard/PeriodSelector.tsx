@@ -114,45 +114,45 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
   ];
 
   return (
-    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-2.5 sm:p-3 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-      {/* Month Navigator (visible primarily when in month mode) */}
+    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 theme-card p-2.5 sm:p-3 rounded-2xl shadow-sm">
+      {/* Month Navigator */}
       <div className="flex items-center justify-between sm:justify-start gap-2">
         {periodState.type === 'month' ? (
           <>
             <button
               onClick={handlePrevMonth}
-              className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer"
               title="Önceki Ay"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/40 border border-slate-700/40">
-              <CalendarIcon className="w-4 h-4 text-indigo-400" />
-              <span className="font-bold text-sm text-white capitalize min-w-[110px] text-center">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl theme-sub-card border theme-border">
+              <CalendarIcon className="w-4 h-4 text-indigo-500" />
+              <span className="font-bold text-sm theme-text capitalize min-w-[110px] text-center">
                 {formatMonthName(periodState.yearMonth)}
               </span>
             </div>
             <button
               onClick={handleNextMonth}
-              className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer"
               title="Sonraki Ay"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </>
         ) : periodState.type === 'day' && periodState.selectedDay ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-sm font-semibold">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-sm font-semibold">
             <Clock className="w-4 h-4" />
             <span>{formatDate(periodState.selectedDay)}</span>
           </div>
         ) : periodState.type === 'custom' && periodState.customRange ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-xs font-semibold">
             <CalendarIcon className="w-4 h-4" />
             <span>{formatDate(periodState.customRange.start)} - {formatDate(periodState.customRange.end)}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-2 text-slate-400 text-sm font-medium">
-            <CalendarIcon className="w-4 h-4 text-slate-500" />
+          <div className="flex items-center gap-2 px-3 py-2 theme-muted text-sm font-medium">
+            <CalendarIcon className="w-4 h-4 text-slate-400" />
             <span>{periodState.type === 'week' ? 'Bu Haftanın Kayıtları' : periodState.type === 'year' ? `${periodState.yearMonth.slice(0, 4)} Yılı` : 'Tüm Kayıtlar'}</span>
           </div>
         )}
@@ -169,7 +169,7 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
               className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  : 'theme-muted hover:opacity-100 hover:bg-slate-500/10'
               }`}
             >
               {tab.label}
@@ -188,7 +188,7 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
@@ -198,20 +198,20 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div className="flex items-center justify-end gap-3 mt-4">
             <button
               type="button"
               onClick={() => setCustomModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
             >
               İptal
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer"
             >
               Uygula
             </button>
@@ -229,20 +229,20 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
               value={selectedDay}
               onChange={e => setSelectedDay(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div className="flex items-center justify-end gap-3 mt-4">
             <button
               type="button"
               onClick={() => setDayModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
             >
               İptal
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer"
             >
               Güne Git
             </button>

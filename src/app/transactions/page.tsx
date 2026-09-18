@@ -41,11 +41,11 @@ export default function TransactionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Receipt className="w-6 h-6 text-indigo-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
+            <Receipt className="w-6 h-6 text-indigo-500" />
             <span>İşlem Kayıtları</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm theme-muted mt-1">
             Tüm gelir ve harcamalarınızı arayın, filtreleyin ve yönetin.
           </p>
         </div>

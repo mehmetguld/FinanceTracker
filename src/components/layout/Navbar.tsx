@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -16,6 +16,7 @@ import {
   X,
   Sparkles
 } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
@@ -23,25 +24,8 @@ interface NavbarProps {
 
 export function Navbar({ onOpenAddModal }: NavbarProps) {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
-  };
 
   const navLinks = [
     { href: '/', label: 'Genel Bakış', icon: LayoutDashboard },
@@ -53,20 +37,20 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b theme-header backdrop-blur-xl transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-indigo-400" />
+              <div className="w-full h-full theme-bg rounded-[10px] flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-indigo-500" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-lg text-white tracking-tight flex items-center gap-1.5">
-                FinanceTracker <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">PRO</span>
+              <span className="font-extrabold text-lg theme-text tracking-tight flex items-center gap-1.5">
+                FinanceTracker <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 font-bold border border-indigo-500/30">PRO</span>
               </span>
-              <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">Kişisel Bütçe Yöneticisi</span>
+              <span className="text-[11px] theme-muted font-medium hidden sm:inline">Kişisel Bütçe Yöneticisi</span>
             </div>
           </Link>
 
@@ -81,8 +65,8 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
                   href={link.href}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-indigo-500/15 text-indigo-400 font-semibold shadow-inner'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 font-semibold shadow-inner'
+                      : 'theme-muted hover:text-indigo-500 hover:bg-slate-500/10'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -103,19 +87,23 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
               <span className="hidden sm:inline">İşlem Ekle</span>
             </button>
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-colors"
+              className="p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer"
               title={theme === 'dark' ? 'Açık Temaya Geç' : 'Karanlık Temaya Geç'}
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-600" />
+              )}
             </button>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
-              className="md:hidden p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+              className="md:hidden p-2.5 rounded-xl theme-sub-card border theme-border theme-text"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -130,12 +118,12 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             className="fixed inset-0 bg-black/70 backdrop-blur-md"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative ml-auto w-4/5 max-w-xs h-full bg-slate-900 border-l border-slate-800 p-6 flex flex-col gap-6 shadow-2xl z-10">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <span className="font-bold text-white text-base">Menü</span>
+          <div className="relative ml-auto w-4/5 max-w-xs h-full theme-card border-l theme-border p-6 flex flex-col gap-6 shadow-2xl z-10">
+            <div className="flex items-center justify-between pb-4 border-b theme-border">
+              <span className="font-bold theme-text text-base">Menü</span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                className="p-2 rounded-lg theme-sub-card theme-muted"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -153,7 +141,7 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
                       isActive
                         ? 'bg-indigo-600 text-white'
-                        : 'text-slate-300 hover:bg-slate-800'
+                        : 'theme-text hover:bg-slate-500/10'
                     }`}
                   >
                     <Icon className="w-5 h-5" />

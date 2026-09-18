@@ -7,13 +7,12 @@ import {
   Trash2, 
   Printer, 
   FileSpreadsheet, 
-  ShieldCheck, 
-  Database, 
-  Info 
+  FileText,
+  Database 
 } from 'lucide-react';
 import { exportDatabaseBackup, hardResetDatabase, db } from '@/lib/db';
 import { importDataFromJson } from '@/lib/legacy-import';
-import { downloadFile, exportTransactionsToCSV, formatCurrency } from '@/lib/utils';
+import { downloadFile, exportTransactionsToCSV, exportTransactionsToExcel, formatCurrency } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 
@@ -73,6 +72,21 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
     reader.readAsText(file);
   };
 
+  // Excel (.xls) Styled Spreadsheet Export for all transactions
+  const handleExportAllExcel = async () => {
+    try {
+      const all = await db.transactions.toArray();
+      if (all.length === 0) {
+        toast('Dışa aktarılacak işlem bulunamadı.', 'warning');
+        return;
+      }
+      exportTransactionsToExcel(all, 'tum_islemler_tablosu.xls');
+      toast('📗 Tam Excel tablosu (.xls) indirildi.', 'success');
+    } catch (err: any) {
+      toast('Excel dosyası oluşturulamadı.', 'error');
+    }
+  };
+
   // CSV Export for all transactions
   const handleExportAllCSV = async () => {
     try {
@@ -82,7 +96,7 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
         return;
       }
       exportTransactionsToCSV(all, 'tum_islemler.csv');
-      toast('📊 Tüm işlemler CSV olarak indirildi.', 'success');
+      toast('📊 Tüm işlemler CSV olarak indirildi (Excel uyumlu).', 'success');
     } catch (err: any) {
       toast('CSV oluşturulamadı.', 'error');
     }
@@ -209,11 +223,11 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
       {/* Architecture Info Banner */}
-      <div className="flex items-start gap-3 p-4 sm:p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200">
-        <Database className="w-6 h-6 text-indigo-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 sm:p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-200">
+        <Database className="w-6 h-6 text-indigo-500 shrink-0 mt-0.5" />
         <div className="text-sm">
-          <h4 className="font-bold text-white text-base">20-30 Yıllık Yüksek Performanslı Yerel Depolama</h4>
-          <p className="mt-1 text-slate-300 leading-relaxed">
+          <h4 className="font-bold theme-text text-base">20-30 Yıllık Yüksek Performanslı Yerel Depolama</h4>
+          <p className="mt-1 theme-muted leading-relaxed">
             Verileriniz hiçbir sunucuya (Firebase, Supabase vb.) gönderilmez; 
             tarayıcınızın kendi <strong>IndexedDB (Dexie.js)</strong> veritabanında B-Tree indeksleri ile saklanır. 
             On binlerce işlem girseniz dahi bellek şişmesi veya kasma yaşanmaz.
@@ -224,13 +238,13 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
       {/* Backup and Restore Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Backup Card */}
-        <div className="flex flex-col justify-between p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+        <div className="flex flex-col justify-between p-6 rounded-2xl theme-card shadow-sm">
           <div>
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mb-4">
               <Download className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">Yedek Al (.json)</h3>
-            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            <h3 className="text-lg font-bold theme-text">Yedek Al (.json)</h3>
+            <p className="text-xs theme-muted mt-1.5 leading-relaxed">
               Tüm gelirler, giderler, özel kategoriler ve ayarlar tek bir `.json` dosyasına paketlenir ve anında cihazınıza indirilir.
             </p>
           </div>
@@ -245,13 +259,13 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
         </div>
 
         {/* Restore Card */}
-        <div className="flex flex-col justify-between p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+        <div className="flex flex-col justify-between p-6 rounded-2xl theme-card shadow-sm">
           <div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
               <Upload className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">Yedek Yükle</h3>
-            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            <h3 className="text-lg font-bold theme-text">Yedek Yükle</h3>
+            <p className="text-xs theme-muted mt-1.5 leading-relaxed">
               Daha önce aldığınız bir `.json` yedeğini yükleyin. Eski <code>tekinex.html</code> formatındaki yedekleri de otomatik algılayıp yeni mimariye aktarır.
             </p>
           </div>
@@ -269,31 +283,45 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
         </div>
       </div>
 
-      {/* Additional Tools (CSV, Print, Reset) */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md flex flex-col gap-4">
-        <h3 className="text-base font-bold text-white">Ekstra Araçlar ve Raporlama</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Additional Tools (Excel, CSV, Print, Reset) */}
+      <div className="p-6 rounded-2xl theme-card shadow-sm flex flex-col gap-4">
+        <div>
+          <h3 className="text-base font-bold theme-text">Raporlama ve Tablo Dışa Aktarma</h3>
+          <p className="text-xs theme-muted mt-0.5">
+            Excel tablosu (.xls), virgülle ayrılmış veri (.csv) veya yazdırılabilir PDF raporları oluşturun.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <button
+            onClick={handleExportAllExcel}
+            className="flex items-center justify-center gap-2 p-3 rounded-xl theme-sub-card hover:opacity-80 theme-text text-xs font-semibold border theme-border transition-colors cursor-pointer"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+            <span>Excel Tablosu (.xls)</span>
+          </button>
+
           <button
             onClick={handleExportAllCSV}
-            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/60 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 p-3 rounded-xl theme-sub-card hover:opacity-80 theme-text text-xs font-semibold border theme-border transition-colors cursor-pointer"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            <span>Excel / CSV Dışa Aktar</span>
+            <FileText className="w-4 h-4 text-indigo-500" />
+            <span>CSV Dışa Aktar</span>
           </button>
 
           <button
             onClick={handlePrintReport}
-            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/60 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 p-3 rounded-xl theme-sub-card hover:opacity-80 theme-text text-xs font-semibold border theme-border transition-colors cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-indigo-400" />
-            <span>Yazdır / PDF Raporu</span>
+            <Printer className="w-4 h-4 text-amber-500" />
+            <span>Yazdır / PDF Rapor</span>
           </button>
 
           <button
             onClick={() => setResetDialogOpen(true)}
-            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold border border-rose-500/30 transition-colors cursor-pointer"
           >
-            <Trash2 className="w-4 h-4 text-rose-400" />
+            <Trash2 className="w-4 h-4 text-rose-500" />
             <span>Tüm Verileri Sıfırla</span>
           </button>
         </div>

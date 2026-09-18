@@ -32,24 +32,24 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 border border-emerald-500/20 p-5 sm:p-6 shadow-xl shadow-emerald-950/20 hover:border-emerald-500/40 transition-all duration-300"
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-all duration-300"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Toplam Gelir</span>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Toplam Gelir</span>
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <TrendingUp className="w-5 h-5" />
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight">
             {formatCurrency(totalIncome)}
           </div>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400/90">
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
             <ArrowUpRight className="w-4 h-4" />
             <span>Kayıtlı gelen fonlar</span>
           </div>
         </div>
-        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
       </motion.div>
 
       {/* Toplam Gider Card */}
@@ -58,24 +58,24 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-950/40 via-slate-900 to-slate-900/90 border border-rose-500/20 p-5 sm:p-6 shadow-xl shadow-rose-950/20 hover:border-rose-500/40 transition-all duration-300"
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-rose-500 hover:-translate-y-1 transition-all duration-300"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Toplam Gider</span>
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+          <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Toplam Gider</span>
+          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <TrendingDown className="w-5 h-5" />
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight">
             {formatCurrency(totalExpense)}
           </div>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-400/90">
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400">
             <ArrowDownRight className="w-4 h-4" />
             <span>Harcanan toplam bütçe</span>
           </div>
         </div>
-        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
       </motion.div>
 
       {/* Net Bakiye Card */}
@@ -84,26 +84,22 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950/50 via-slate-900 to-slate-900/90 border p-5 sm:p-6 shadow-xl transition-all duration-300 ${
-          balance >= 0
-            ? 'border-indigo-500/20 shadow-indigo-950/20 hover:border-indigo-500/40'
-            : 'border-amber-500/30 shadow-amber-950/20 hover:border-amber-500/50'
-        }`}
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-indigo-500 hover:-translate-y-1 transition-all duration-300"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Net Bakiye</span>
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Net Bakiye</span>
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Wallet className="w-5 h-5" />
           </div>
         </div>
         <div className="mt-4">
-          <div className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${balance >= 0 ? 'text-white' : 'text-amber-400'}`}>
+          <div className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${balance >= 0 ? 'theme-text' : 'text-rose-600 dark:text-rose-400'}`}>
             {formatCurrency(balance)}
           </div>
-          <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-2 flex items-center justify-between text-xs theme-muted">
             <span>{transactionCount} işlem kaydedildi</span>
             {totalIncome > 0 && (
-              <span className="font-semibold text-indigo-300">
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                 %{savingsRate.toFixed(0)} Tasarruf
               </span>
             )}

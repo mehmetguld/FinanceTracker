@@ -76,11 +76,11 @@ export default function DashboardPage() {
       {/* Top Welcome & Quick Action Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
             <span>Finansal Özet</span>
-            <Sparkles className="w-5 h-5 text-indigo-400" />
+            <Sparkles className="w-5 h-5 text-indigo-500" />
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm theme-muted mt-1">
             Gelir ve giderlerinizi anlık olarak takip edin, bütçenizi yönetin.
           </p>
         </div>

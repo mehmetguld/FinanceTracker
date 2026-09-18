@@ -62,11 +62,11 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-          <PieChart className="w-6 h-6 text-indigo-400" />
+        <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
+          <PieChart className="w-6 h-6 text-indigo-500" />
           <span>Grafikler & Finansal Analiz</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm theme-muted mt-1">
           Harcama alışkanlıklarınızı ve bütçe dengenizi görsel grafiklerle inceleyin.
         </p>
       </div>
@@ -83,36 +83,36 @@ export default function AnalyticsPage() {
       />
 
       {/* Top Expense Breakdown Table */}
-      <div className="bg-slate-900/60 p-5 sm:p-6 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-        <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-rose-400" />
+      <div className="theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
+        <h3 className="text-base font-bold theme-text mb-4 flex items-center gap-2">
+          <TrendingDown className="w-4 h-4 text-rose-500" />
           <span>Kategori Bazında Harcama Sıralaması</span>
         </h3>
 
         {breakdown.length === 0 ? (
-          <p className="text-sm text-slate-500 py-6 text-center">Bu dönemde kayıtlı gider bulunmuyor.</p>
+          <p className="text-sm theme-muted py-6 text-center">Bu dönemde kayıtlı gider bulunmuyor.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-800 text-xs font-bold text-slate-400 uppercase">
+                <tr className="border-b theme-border text-xs font-bold theme-muted uppercase">
                   <th className="pb-3 pl-1">Kategori</th>
                   <th className="pb-3 text-right">İşlem Sayısı</th>
                   <th className="pb-3 text-right">Harcama Payı</th>
                   <th className="pb-3 text-right pr-1">Toplam Tutar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y theme-border">
                 {breakdown.map(item => (
-                  <tr key={item.category} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3.5 pl-1 flex items-center gap-2.5 font-semibold text-white">
+                  <tr key={item.category} className="hover:opacity-80 transition-opacity">
+                    <td className="py-3.5 pl-1 flex items-center gap-2.5 font-semibold theme-text">
                       <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span>{item.category}</span>
                     </td>
-                    <td className="py-3.5 text-right text-slate-400">{item.count} adet</td>
-                    <td className="py-3.5 text-right font-medium text-slate-300">
+                    <td className="py-3.5 text-right theme-muted">{item.count} adet</td>
+                    <td className="py-3.5 text-right font-medium theme-text">
                       <div className="inline-flex items-center gap-2">
-                        <div className="w-16 h-2 rounded-full bg-slate-800 overflow-hidden hidden sm:block">
+                        <div className="w-16 h-2 rounded-full theme-sub-card overflow-hidden hidden sm:block">
                           <div
                             className="h-full rounded-full"
                             style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
@@ -121,7 +121,7 @@ export default function AnalyticsPage() {
                         <span>%{item.percentage.toFixed(1)}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 text-right font-extrabold text-rose-400 pr-1">
+                    <td className="py-3.5 text-right font-extrabold text-rose-600 dark:text-rose-400 pr-1">
                       {formatCurrency(item.amount)}
                     </td>
                   </tr>

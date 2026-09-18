@@ -18,6 +18,7 @@ import {
 import { CategoryExpenseBreakdown, FinancialSummary, Transaction } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { PieChart as PieIcon, BarChart3, TrendingDown } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ChartsViewProps {
   breakdown: CategoryExpenseBreakdown[];
@@ -27,6 +28,7 @@ interface ChartsViewProps {
 
 export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,11 +37,17 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
   if (!isMounted) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="h-80 bg-slate-900/60 rounded-2xl border border-slate-800 animate-pulse" />
-        <div className="h-80 bg-slate-900/60 rounded-2xl border border-slate-800 animate-pulse" />
+        <div className="h-80 theme-card rounded-2xl animate-pulse" />
+        <div className="h-80 theme-card rounded-2xl animate-pulse" />
       </div>
     );
   }
+
+  const isDark = theme === 'dark';
+  const axisColor = isDark ? '#94a3b8' : '#64748b';
+  const gridColor = isDark ? '#334155' : '#e2e8f0';
+  const tooltipBg = isDark ? '#0f172a' : '#ffffff';
+  const tooltipBorder = isDark ? '#334155' : '#cbd5e1';
 
   // Data for Bar comparison
   const comparisonData = [
@@ -50,7 +58,7 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
   // Daily trend calculation
   const dailyMap: Record<string, { income: number; expense: number }> = {};
   transactions.forEach(t => {
-    const day = t.date.slice(8, 10); // Day of month
+    const day = t.date.slice(8, 10);
     if (!dailyMap[day]) {
       dailyMap[day] = { income: 0, expense: 0 };
     }
@@ -70,13 +78,13 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="p-3 bg-slate-900/95 border border-slate-700 rounded-xl shadow-xl backdrop-blur-md">
+        <div className="p-3 theme-card rounded-xl shadow-xl border">
           <div className="flex items-center gap-2 mb-1">
             <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color }} />
-            <span className="font-bold text-white text-sm">{data.category}</span>
+            <span className="font-bold theme-text text-sm">{data.category}</span>
           </div>
-          <p className="text-xs text-rose-400 font-bold">{formatCurrency(data.amount)}</p>
-          <p className="text-[11px] text-slate-400">%{data.percentage.toFixed(1)} pay</p>
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-bold">{formatCurrency(data.amount)}</p>
+          <p className="text-[11px] theme-muted">%{data.percentage.toFixed(1)} pay</p>
         </div>
       );
     }
@@ -87,9 +95,9 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="p-3 bg-slate-900/95 border border-slate-700 rounded-xl shadow-xl backdrop-blur-md">
-          <span className="font-bold text-white text-sm">{data.name}</span>
-          <p className={`text-xs font-bold mt-0.5 ${data.name === 'Gelir' ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <div className="p-3 theme-card rounded-xl shadow-xl border">
+          <span className="font-bold theme-text text-sm">{data.name}</span>
+          <p className={`text-xs font-bold mt-0.5 ${data.name === 'Gelir' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {formatCurrency(data.tutar)}
           </p>
         </div>
@@ -101,21 +109,21 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Kategori Harcama Dağılımı (Donut) */}
-      <div className="flex flex-col bg-slate-900/60 p-5 sm:p-6 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
+        <div className="flex items-center justify-between pb-4 border-b theme-border">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
               <PieIcon className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-base font-bold text-white">Kategori Harcama Dağılımı</h4>
-              <p className="text-xs text-slate-400">Giderlerin kategorilere göre yüzdesi</p>
+              <h4 className="text-base font-bold theme-text">Kategori Harcama Dağılımı</h4>
+              <p className="text-xs theme-muted">Giderlerin kategorilere göre yüzdesi</p>
             </div>
           </div>
         </div>
 
         {breakdown.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center text-slate-500 text-sm">
+          <div className="flex flex-col items-center justify-center py-16 text-center theme-muted text-sm">
             Bu dönemde gösterilecek gider kaydı yok.
           </div>
         ) : (
@@ -133,7 +141,7 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
                     dataKey="amount"
                   >
                     {breakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(15, 23, 42, 0.8)" strokeWidth={2} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke={isDark ? '#0f172a' : '#ffffff'} strokeWidth={2} />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomPieTooltip />} />
@@ -147,11 +155,11 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
                 <div key={item.category} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                    <span className="text-slate-300 font-medium truncate">{item.category}</span>
+                    <span className="theme-text font-medium truncate">{item.category}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-slate-200">{formatCurrency(item.amount)}</span>
-                    <span className="text-[10px] text-slate-500 w-9 text-right font-semibold">
+                    <span className="font-bold theme-text">{formatCurrency(item.amount)}</span>
+                    <span className="text-[10px] theme-muted w-9 text-right font-semibold">
                       %{item.percentage.toFixed(0)}
                     </span>
                   </div>
@@ -163,15 +171,15 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
       </div>
 
       {/* Gelir vs Gider Karşılaştırması (Bar) */}
-      <div className="flex flex-col bg-slate-900/60 p-5 sm:p-6 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
+        <div className="flex items-center justify-between pb-4 border-b theme-border">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-base font-bold text-white">Gelir - Gider Karşılaştırması</h4>
-              <p className="text-xs text-slate-400">Toplam nakit dengesi</p>
+              <h4 className="text-base font-bold theme-text">Gelir - Gider Karşılaştırması</h4>
+              <p className="text-xs theme-muted">Toplam nakit dengesi</p>
             </div>
           </div>
         </div>
@@ -179,9 +187,9 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
         <div className="h-64 w-full mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={comparisonData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.4} />
-              <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
+              <XAxis dataKey="name" stroke={axisColor} fontSize={12} tickLine={false} />
+              <YAxis stroke={axisColor} fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
               <Tooltip content={<CustomBarTooltip />} />
               <Bar dataKey="tutar" radius={[8, 8, 0, 0]} />
             </BarChart>
@@ -191,15 +199,15 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
 
       {/* Günlük Harcama Trendi (Area) */}
       {dailyTrendData.length > 1 && (
-        <div className="lg:col-span-2 flex flex-col bg-slate-900/60 p-5 sm:p-6 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="lg:col-span-2 flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between pb-4 border-b theme-border">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400">
+              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500">
                 <TrendingDown className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-white">Günlük Harcama Eğrisi</h4>
-                <p className="text-xs text-slate-400">Seçili dönem boyunca harcamaların gün bazında akışı</p>
+                <h4 className="text-base font-bold theme-text">Günlük Harcama Eğrisi</h4>
+                <p className="text-xs theme-muted">Seçili dönem boyunca harcamaların gün bazında akışı</p>
               </div>
             </div>
           </div>
@@ -213,12 +221,12 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
                     <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-                <XAxis dataKey="gun" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
+                <XAxis dataKey="gun" stroke={axisColor} fontSize={11} tickLine={false} />
+                <YAxis stroke={axisColor} fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
                 <Tooltip
                   formatter={(val: any) => [formatCurrency(Number(val)), 'Harcama']}
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                  contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '12px' }}
                 />
                 <Area type="monotone" dataKey="Harcama" stroke="#f43f5e" strokeWidth={2.5} fillOpacity={1} fill="url(#expenseGrad)" />
               </AreaChart>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ToastProvider } from '@/components/ui/Toast';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { ModalProvider, useGlobalModal } from '@/context/ModalContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
@@ -35,7 +36,7 @@ function InnerApp({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen flex flex-col theme-bg theme-text transition-colors duration-200 selection:bg-indigo-500/30 selection:text-indigo-200">
       <Navbar onOpenAddModal={() => openAddModal()} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-12">
@@ -60,10 +61,12 @@ function InnerApp({ children }: { children: React.ReactNode }) {
 
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ToastProvider>
-      <ModalProvider>
-        <InnerApp>{children}</InnerApp>
-      </ModalProvider>
-    </ToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <ModalProvider>
+          <InnerApp>{children}</InnerApp>
+        </ModalProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }

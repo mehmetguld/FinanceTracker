@@ -29,11 +29,11 @@ export default function CategoriesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-          <Tags className="w-6 h-6 text-indigo-400" />
+        <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
+          <Tags className="w-6 h-6 text-indigo-500" />
           <span>Kategori Yönetimi</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm theme-muted mt-1">
           Harcama ve gelirlerinizi sınıflandırın, özel renkler tanımlayın ve yönetin.
         </p>
       </div>
