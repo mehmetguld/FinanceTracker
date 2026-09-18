@@ -9,7 +9,7 @@ import { ModalProvider, useGlobalModal } from '@/context/ModalContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { TransactionModal } from '@/components/transactions/TransactionModal';
-import { db, ensureInitialized } from '@/lib/db';
+import { db, getAllCategories } from '@/lib/db';
 import { Category } from '@/types';
 
 function InnerApp({ children }: { children: React.ReactNode }) {
@@ -17,10 +17,15 @@ function InnerApp({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const loadCategories = async () => {
-    await ensureInitialized();
-    const all = await db.categories.toArray();
+    const all = await getAllCategories();
     setCategories(all);
   };
+
+  useEffect(() => {
+    if (isAddModalOpen) {
+      loadCategories();
+    }
+  }, [isAddModalOpen]);
 
   useEffect(() => {
     loadCategories();

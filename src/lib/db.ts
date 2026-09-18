@@ -27,19 +27,49 @@ export class FinanceDatabase extends Dexie {
       categories: '++id, &name',
       settings: 'key'
     });
+
+    this.on('populate', () => {
+      this.categories.bulkAdd(DEFAULT_CATEGORIES);
+    });
   }
 }
 
 export const db = new FinanceDatabase();
+
+let initPromise: Promise<void> | null = null;
 
 /**
  * Ensures initial default categories exist in IndexedDB
  */
 export async function ensureInitialized(): Promise<void> {
   if (typeof window === 'undefined') return;
-  const count = await db.categories.count();
-  if (count === 0) {
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        const count = await db.categories.count();
+        if (count === 0) {
+          await db.categories.bulkAdd(DEFAULT_CATEGORIES);
+        }
+      } catch (err) {
+        console.warn('ensureInitialized error:', err);
+      }
+    })();
+  }
+  return initPromise;
+}
+
+/**
+ * Guarantees a non-empty category list, even on the very first render
+ */
+export async function getAllCategories(): Promise<Category[]> {
+  await ensureInitialized();
+  try {
+    const list = await db.categories.toArray();
+    if (list.length > 0) return list;
     await db.categories.bulkAdd(DEFAULT_CATEGORIES);
+    return await db.categories.toArray();
+  } catch {
+    return DEFAULT_CATEGORIES as Category[];
   }
 }
 

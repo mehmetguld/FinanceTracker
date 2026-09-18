@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Modal } from '@/components/ui/Modal';
-import { db } from '@/lib/db';
+import { db, getAllCategories, DEFAULT_CATEGORIES } from '@/lib/db';
 import { Transaction, Category, TransactionType } from '@/types';
 import { useToast } from '@/components/ui/Toast';
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,11 +33,28 @@ export function TransactionModal({
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [internalCategories, setInternalCategories] = useState<Category[]>([]);
 
   // Validation States
   const [amountError, setAmountError] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [isShaking, setIsShaking] = useState(false);
+
+  // Active category list guaranteed to never be empty
+  const activeCategories: (Category | Omit<Category, 'id'>)[] = 
+    internalCategories.length > 0 
+      ? internalCategories 
+      : (categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    if (isOpen) {
+      getAllCategories().then(cats => {
+        if (cats && cats.length > 0) {
+          setInternalCategories(cats);
+        }
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (transactionToEdit) {
@@ -49,14 +66,14 @@ export function TransactionModal({
     } else {
       setType('expense');
       setAmount('');
-      setCategory(categories[0]?.name || 'Diğer');
+      setCategory(prev => prev || activeCategories[0]?.name || 'Diğer');
       setDate(new Date().toISOString().slice(0, 10));
       setDescription('');
     }
     setAmountError(null);
     setDateError(null);
     setIsShaking(false);
-  }, [transactionToEdit, isOpen, categories]);
+  }, [transactionToEdit, isOpen, categories, internalCategories]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -231,7 +248,7 @@ export function TransactionModal({
               onChange={e => setCategory(e.target.value)}
               className="w-full px-3.5 py-3 rounded-xl theme-input border theme-border theme-text font-medium text-sm focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              {categories.map(c => (
+              {activeCategories.map(c => (
                 <option key={c.name} value={c.name} className="theme-card theme-text">
                   {c.name}
                 </option>

@@ -45,17 +45,18 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b theme-header backdrop-blur-xl transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-md sm:shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300 shrink-0">
               <div className="w-full h-full theme-bg rounded-[10px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-indigo-500" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-lg theme-text tracking-tight flex items-center gap-1.5">
-                FinanceTracker <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 font-bold border border-indigo-500/30">PRO</span>
+              <span className="font-extrabold text-base sm:text-lg theme-text tracking-tight flex items-center gap-1 sm:gap-1.5">
+                <span>FinanceTracker</span>
+                <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 font-bold border border-indigo-500/30">PRO</span>
               </span>
               <span className="text-[11px] theme-muted font-medium hidden sm:inline">
                 {language === 'tr' ? 'Kişisel Bütçe Yöneticisi' : 'Personal Finance Manager'}
@@ -86,14 +87,14 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Quick Add Button */}
+          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+            {/* Quick Add Button (Desktop only - mobile has bottom FAB) */}
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
-              <span className="hidden sm:inline">
+              <span>
                 {language === 'tr' ? 'İşlem Ekle' : 'Add'}
               </span>
             </button>
@@ -101,17 +102,17 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             {/* Language Switcher Button */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all font-bold text-xs theme-text cursor-pointer active:scale-95"
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all font-bold text-xs theme-text cursor-pointer active:scale-95"
               title={language === 'tr' ? 'Switch to English' : 'Türkçeye Geç'}
             >
               <span className="text-sm leading-none">{language === 'tr' ? '🇹🇷' : '🇬🇧'}</span>
-              <span className="uppercase tracking-wider font-extrabold">{language === 'tr' ? 'TR' : 'EN'}</span>
+              <span className="uppercase tracking-wider font-extrabold text-[11px] sm:text-xs">{language === 'tr' ? 'TR' : 'EN'}</span>
             </button>
 
             {/* Privacy Mode Toggle Button */}
             <button
               onClick={togglePrivacy}
-              className="p-2 sm:p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer active:scale-95"
+              className="p-1.5 sm:p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer active:scale-95"
               title={isPrivate ? (language === 'tr' ? 'Bakiyeleri Göster' : 'Show Balances') : (language === 'tr' ? 'Bakiyeleri Gizle' : 'Hide Balances')}
             >
               {isPrivate ? (
@@ -124,7 +125,7 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 sm:p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer active:scale-95"
+              className="p-1.5 sm:p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer active:scale-95"
               title={theme === 'dark' ? (language === 'tr' ? 'Açık Temaya Geç' : 'Light Mode') : (language === 'tr' ? 'Karanlık Temaya Geç' : 'Dark Mode')}
             >
               {theme === 'dark' ? (
@@ -137,9 +138,10 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
-              className="md:hidden p-2 sm:p-2.5 rounded-xl theme-sub-card border theme-border theme-text active:scale-95"
+              className="md:hidden p-1.5 sm:p-2.5 rounded-xl theme-sub-card border theme-border theme-text active:scale-95"
+              aria-label="Toggle Menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
             </button>
           </div>
         </div>
