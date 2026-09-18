@@ -42,6 +42,17 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
     { href: '/settings', label: t('nav.settings'), icon: Settings },
   ];
 
+  const isLinkActive = (href: string) => {
+    if (!pathname) return false;
+    let cleanPath = pathname.replace(/\/$/, '') || '/';
+    if (cleanPath.startsWith('/FinanceTracker')) {
+      cleanPath = cleanPath.replace(/^\/FinanceTracker/, '') || '/';
+    }
+    const cleanHref = href.replace(/\/$/, '') || '/';
+    if (cleanHref === '/') return cleanPath === '/';
+    return cleanPath === cleanHref || cleanPath.startsWith(cleanHref + '/');
+  };
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b theme-header backdrop-blur-xl transition-colors duration-200">
@@ -68,14 +79,14 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map(link => {
               const Icon = link.icon;
-              const isActive = pathname === link.href;
+              const isActive = isLinkActive(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 font-semibold shadow-inner'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                       : 'theme-muted hover:text-indigo-500 hover:bg-slate-500/10'
                   }`}
                 >
@@ -170,15 +181,15 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             <div className="flex flex-col gap-2">
               {navLinks.map(link => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                const isActive = isLinkActive(link.href);
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-colors ${
                       isActive
-                        ? 'bg-indigo-600 text-white font-semibold'
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                         : 'theme-text hover:bg-slate-500/10'
                     }`}
                   >
