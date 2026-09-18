@@ -1,88 +1,131 @@
-# ⚡ FinanceTracker PRO
+<div align="center">
 
-> Modern, ultra-fast, offline-first personal finance tracker built with Next.js 16 (Turbopack), TypeScript, Tailwind CSS, and Dexie.js (IndexedDB). Engineered for 20-30+ years of high-volume financial data with zero performance degradation.
+# 💎 FinanceTracker PRO
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
-[![Dexie.js](https://img.shields.io/badge/Dexie.js-IndexedDB-orange?style=flat-square)](https://dexie.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=flat-square)](LICENSE)
+### Yeni Nesil, Çift Dilli, Yüksek Performanslı Kişisel Finans ve Bütçe Takip Uygulaması
+*Next.js 16 (Turbopack) • TypeScript • Tailwind CSS • Dexie.js (IndexedDB) • Recharts • Framer Motion*
 
----
+<br/>
 
-## 🌟 Key Features
+[![Next.js](https://img.shields.io/badge/Next.js-16.3-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Dexie.js](https://img.shields.io/badge/Dexie.js-IndexedDB-E84E36?style=for-the-badge)](https://dexie.org/)
+[![License](https://img.shields.io/badge/Lisans-MIT-22c55e?style=for-the-badge)](LICENSE)
 
-- **⚡ 20-30 Year Lag-Free Local Database**: Built on IndexedDB using Dexie.js with B-Tree compound indices (`[yearMonth+type]`, `date`, `category`). Tens of thousands of records load in under 10ms with zero memory bloat.
-- **🔒 100% Offline & Private**: Zero cloud dependencies, zero external tracking. Your financial data stays strictly on your device. Includes instant Privacy Mode (`••••••` balance masking).
-- **🌐 Bilingual (Turkish 🇹🇷 & English 🇬🇧)**: Fully localized reactive i18n engine with one-click language switching from the Navbar or Settings page.
-- **📊 Comprehensive Financial Analytics**:
-  - **Category Donut Chart**: Toggle between Income and Expense category distribution.
-  - **Cash Flow Area Curve**: Simultaneous dual-curve visualization plotting both Income (emerald) and Expenses (rose) over time.
-  - **Balance Bar Chart**: Periodical income vs. expense cash balance comparisons.
-- **⚡ Quick Date Filtering**:
-  - Direct **"⚡ Bugün" (Today)** filter for instant daily accounting.
-  - Quick tabs: *Bu Hafta (This Week)*, *Bu Ay (This Month)*, *Bu Yıl (This Year)*, *Tüm Zamanlar (All Time)*, *Özel Aralık (Custom Range)*, and *Güne Git (Go to Date)*.
-- **🏷️ Dynamic Category Management**:
-  - Full CRUD for categories with custom color pickers.
-  - Simultaneous tracking of Income, Expense, Net Balance, and Transaction counts per category.
-  - Safe category deletion with transaction migration options.
-- **📥 Backup & Seamless Migration**:
-  - Single-click JSON backup and restore.
-  - **Legacy Tekinex Importer**: Seamlessly imports and converts old single-file `tekinex.html` JSON backups into the modern database architecture.
-- **📗 Formatted Excel & CSV Exports**:
-  - Native styled Excel (`.xls`) spreadsheets with colors, gridlines, and automatic `=SUM()` total formulas.
-  - Turkish Windows Excel compatible CSV (`sep=;\r\n`) with comma decimals.
-  - Print-ready PDF financial report generator.
-- **🌓 Dark & Light Mode**: Fluid theme engine with system/manual synchronization.
-- **📱 Fully Responsive**: Fluid mobile bottom drawer navigation and desktop modal experiences with spring micro-interactions.
+<br/>
+
+**FinanceTracker PRO**, kullanıcıların gelir ve giderlerini anlık olarak takip edebildiği, dönemsel bütçe analizleri yapabildiği ve on binlerce işlem girilse dahi sıfır gecikmeyle (lag-free) çalışan, **%100 gizlilik odaklı (offline-first)** modern bir web uygulamasıdır.
+
+[🌟 Özellikler](#-öne-çıkan-özellikler) • [📸 Modüller](#-uygulama-modülleri) • [🚀 Kurulum](#-hızlı-kurulum) • [⌨️ Kısayollar](#️-klavye-kısayolları) • [📄 Lisans](#-lisans)
+
+</div>
 
 ---
 
-## 🛠️ Technology Stack
+## 🌟 Öne Çıkan Özellikler
 
-- **Framework**: [Next.js 16 (App Router + Turbopack)](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with CSS theme variables
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Local Database**: [Dexie.js](https://dexie.org/) (Client-side IndexedDB wrapper)
+### ⚡ 1. 20-30 Yıllık Kesintisiz Yerel Performans
+- Verileriniz harici hiçbir sunucuya (Firebase, Supabase vb.) gönderilmez; doğrudan tarayıcınızın kendi **IndexedDB** veritabanında **Dexie.js B-Tree bileşik indeksleri** ile saklanır.
+- On binlerce işlem kaydında bile arama, filtreleme ve sayfalama mikrosaniyeler içinde gerçekleşir.
+
+### 🌐 2. Tam Kapsamlı Çift Dil Desteği (Türkçe 🇹🇷 & English 🇬🇧)
+- Sıfır dış paket hamallığıyla çalışan hafif, anlık reaktif i18n dil motoru.
+- Hem üst menüdeki `🇹🇷 TR / 🇬🇧 EN` butonundan hem de Ayarlar sayfasından tek tıkla dil değiştirilebilir.
+- Sayfa başlıkları, grafikler, ay/tarih formatları ve raporlar seçilen dile dinamik olarak adapte olur.
+
+### 📊 3. Çift Yönlü Dinamik Grafikler & Finansal Analiz
+- **Kategori Dağılımı (Halka / Donut Grafik)**: Hem **Gider** hem de **Gelir** dağılımını tek tıkla inceleme imkanı.
+- **Nakit Akışı Eğrisi (Alan / Area Grafik)**: Zaman ekseninde Gelir (Yeşil) ve Gider (Kırmızı) hareketlerini eşzamanlı çift eğri olarak izleme.
+- **Denge Karşılaştırması (Çubuk / Bar Grafik)**: Toplam nakit giriş ve çıkışının net karşılaştırması.
+
+### ⚡ 4. Hızlı Tarih ve Periyot Filtreleme
+- **`⚡ Bugün` Butonu**: Tek tıkla sadece o günün gelir ve giderlerine odaklanma.
+- **Dönem Sekmeleri**: *Bu Hafta*, *Bu Ay*, *Bu Yıl*, *Tüm Zamanlar*, *Özel Tarih Aralığı* ve *Belirli Güne Git*.
+
+### 🔒 5. Gizlilik Modu (Bakiye Maskeleme)
+- Kalabalık ortamlarda veya ekran paylaşırken tek tıkla (`👁️` butonu) tüm finansal tutarları `••••••` şeklinde anında gizleme.
+
+### 💾 6. Tek Tıkla Yedekleme & Eski Tekinex İçe Aktarma
+- **JSON Yedekleme**: Tüm veritabanını tek tıkla JSON dosyası olarak indirme ve dilediğiniz zaman geri yükleme.
+- **Eski Sistem Göçü (Legacy Migrator)**: Eski tek dosyalık `tekinex.html` JSON yedeklerini otomatik algılar, dönüştürür ve yeni mimariye eksiksiz taşır.
+
+### 📗 7. Profesyonel Excel (.xls) ve CSV Çıktısı
+- Renklendirilmiş başlıklar, otomatik `=TOPLA()` formülleri ve hücre çizgileri içeren **gerçek Microsoft Excel tablosu (.xls)** çıktısı.
+- Türkçe Windows Excel uyumlu noktalı virgül (`;`) ve virgüllü ondalık formatlı CSV dökümü.
+- Yazdırılabilir tek sayfalık resmi PDF finansal döküm raporu.
+
+### 🎨 8. Aydınlık ve Karanlık Tema (Dark / Light Mode)
+- Göz yormayan şık koyu tema ve ferah açık tema arasında tek tıkla geçiş.
 
 ---
 
-## 🚀 Getting Started
+## 📸 Uygulama Modülleri
 
-### Prerequisites
+| Modül | Açıklama |
+| :--- | :--- |
+| **🏠 Finansal Özet (Dashboard)** | Toplam gelir, toplam gider, net bakiye kartları, AI finansal içgörüleri ve hızlı işlem listesi. |
+| **💳 İşlem Geçmişi (Transactions)** | Gerçek zamanlı arama, gelir/gider tür filtreleme, excel/csv indirme ve sayfalama. |
+| **📈 Grafikler & Analiz (Analytics)** | Çift eğrili akış grafiği, halka dağılım ve kategori bazında sıralama tabloları. |
+| **🏷️ Kategori Yönetimi (Categories)** | Özel renk paletli kategori oluşturma, net bakiye takibi ve silme esnasında işlem taşıma. |
+| **⚙️ Yedekleme & Ayarlar (Settings)** | Dil tercihi (TR/EN), JSON yedek alma/yükleme, veri dışa aktarma ve veritabanı sıfırlama. |
 
-Ensure you have **Node.js 18.18+** installed on your system.
+---
 
-### Installation
+## ⌨️ Klavye Kısayolları
 
-1. Clone the repository:
+| Kısayol | Eylem |
+| :--- | :--- |
+| `Ctrl + N` / `Cmd + N` | Herhangi bir sayfadayken anında **Yeni İşlem Ekle** modalını açar |
+| `Escape` | Açık olan herhangi bir modal veya açılır pencereyi kapatır |
+
+---
+
+## 🛠️ Teknoloji Yığını
+
+- **Çekirdek**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **Dil**: [TypeScript](https://www.typescriptlang.org/)
+- **Stil & Tasarım**: [Tailwind CSS v4](https://tailwindcss.com/) & Özel CSS Tema Motoru
+- **Animasyonlar & Etkileşim**: [Framer Motion](https://www.framer.com/motion/) (Shake doğrulaması, yay efektleri)
+- **Görsel Grafikler**: [Recharts](https://recharts.org/)
+- **İkon Seti**: [Lucide React](https://lucide.dev/)
+- **İstemci Veritabanı**: [Dexie.js](https://dexie.org/) (IndexedDB B-Tree API)
+
+---
+
+## 🚀 Hızlı Kurulum
+
+Projeyi bilgisayarınızda yerel olarak çalıştırmak için:
+
+### Gereksinimler
+- **Node.js**: `v18.18+` veya üzeri
+- **npm** veya **pnpm** / **yarn**
+
+### Adımlar
+
+1. **Repoyu Klonlayın:**
    ```bash
    git clone https://github.com/mehmetguld/FinanceTracker.git
    cd FinanceTracker
    ```
 
-2. Install dependencies:
+2. **Bağımlılıkları Yükleyin:**
    ```bash
    npm install
    ```
 
-3. Start the local development server:
+3. **Geliştirme Sunucusunu Başlatın:**
    ```bash
    npm run dev
    ```
 
-4. Open your browser and navigate to:
+4. **Tarayıcınızda Açın:**
    ```
    http://localhost:3000
    ```
 
-### Production Build
-
-To test and create an optimized production build:
-
+### 📦 Canlıya Alma (Production Build)
+Projeyi derleyip optimize edilmiş prodüksiyon sürümünü test etmek için:
 ```bash
 npm run build
 npm run start
@@ -90,46 +133,48 @@ npm run start
 
 ---
 
-## 📁 Project Structure
+## 📁 Proje Dizin Yapısı
 
-```
-Finance-Tracker/
+```text
+FinanceTracker/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── page.tsx            # Main Financial Overview & Dashboard
-│   │   ├── transactions/       # Transaction management page
-│   │   ├── analytics/          # Deep-dive charts & ranking tables
-│   │   ├── categories/         # Category organizer & stats
-│   │   ├── settings/           # Backup, restore & language options
-│   │   └── layout.tsx          # Root layout & providers
+│   ├── app/                      # Next.js 16 App Router sayfaları
+│   │   ├── page.tsx              # Ana sayfa & Finansal Özet
+│   │   ├── transactions/         # İşlem Geçmişi sayfası
+│   │   ├── analytics/            # Grafikler & Finansal Analiz
+│   │   ├── categories/           # Kategori Yönetimi
+│   │   ├── settings/             # Yedekleme, Ayarlar & Dil Seçimi
+│   │   └── layout.tsx            # Kök layout ve tema/dil sarmalayıcıları
 │   ├── components/
-│   │   ├── charts/             # Dual-curve area & donut charts
-│   │   ├── dashboard/          # Summary cards, period selector, AI insights
-│   │   ├── layout/             # Responsive navbar & bottom navigation
-│   │   ├── transactions/       # Transaction list & add/edit modal
-│   │   ├── categories/         # Category manager & migration dialogs
-│   │   └── ui/                 # Reusable modals, toast notifications, confirm dialogs
+│   │   ├── charts/               # Recharts tabanlı çift eğrili ve halka grafikler
+│   │   ├── dashboard/            # Özet kartları, dönem seçici, AI analizleri
+│   │   ├── layout/               # Navbar, alt mobil menü, tema/dil seçici
+│   │   ├── transactions/         # İşlem listesi, shake animasyonlu ekleme modalı
+│   │   ├── categories/           # Kategori yönetici kartları ve taşıma modalları
+│   │   └── ui/                   # Portal tabanlı modallar, toast ve onay kutuları
 │   ├── context/
-│   │   ├── LanguageContext.tsx # Bilingual TR/EN reactive i18n engine
-│   │   ├── ThemeContext.tsx    # Dark/light theme manager
-│   │   ├── PrivacyContext.tsx  # Balance masking context
-│   │   └── ModalContext.tsx    # Global transaction modal state
+│   │   ├── LanguageContext.tsx   # Reaktif TR/EN dil sağlayıcısı
+│   │   ├── ThemeContext.tsx      # Aydınlık / Karanlık tema sağlayıcısı
+│   │   ├── PrivacyContext.tsx    # Bakiye gizleme / Gizlilik modu
+│   │   └── ModalContext.tsx      # Global işlem ekleme penceresi
 │   ├── locales/
-│   │   ├── tr.ts               # Turkish translation dictionary
-│   │   └── en.ts               # English translation dictionary
+│   │   ├── tr.ts                 # Türkçe çeviri sözlüğü
+│   │   └── en.ts                 # İngilizce çeviri sözlüğü
 │   ├── lib/
-│   │   ├── db.ts               # IndexedDB schema & B-Tree queries (Dexie.js)
-│   │   ├── utils.ts            # Currency, date, and Excel/.xls generators
-│   │   └── legacy-import.ts    # Tekinex.html legacy data parser
+│   │   ├── db.ts                 # Dexie.js veritabanı şeması ve hızlı sorgular
+│   │   ├── utils.ts              # Para/tarih formatlayıcılar ve Excel motoru
+│   │   └── legacy-import.ts      # Eski tekinex.html verilerini içeri aktarıcı
 │   └── types/
-│       └── index.ts            # TypeScript interfaces & models
-└── README.md
+│       └── index.ts              # TypeScript tip tanımları ve arayüzler
+├── public/                       # Statik varlıklar ve ikonlar
+├── LICENSE                       # MIT Lisansı
+└── README.md                     # Proje dokümantasyonu
 ```
 
 ---
 
-## 📄 License
+## 📄 Lisans
 
-This project is open-source and licensed under the [MIT License](LICENSE).
+Bu proje [MIT Lisansı](LICENSE) kapsamında açık kaynak olarak lisanslanmıştır.
 
-Developed with ❤️ by [mehmetguld](https://github.com/mehmetguld).
+Geliştirici: **[mehmetguld](https://github.com/mehmetguld)**
