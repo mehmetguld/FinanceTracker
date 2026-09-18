@@ -192,18 +192,18 @@ export function TransactionModal({
           </div>
         </div>
 
-        {/* Description Input */}
+        {/* Description / Note Textarea (Doubled size) */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Açıklama / Not</span>
+            <span>Açıklama / Detaylı Not</span>
           </label>
-          <input
-            type="text"
-            placeholder="Örn: Market alışverişi, Fatura vb."
+          <textarea
+            rows={4}
+            placeholder="İşlem detayları, notlar veya açıklama yazın..."
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="w-full px-3.5 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+            className="w-full px-4 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder-slate-500 resize-none transition-colors"
           />
         </div>
 

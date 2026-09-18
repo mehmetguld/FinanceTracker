@@ -7,8 +7,7 @@ import {
   Trash2, 
   Printer, 
   FileSpreadsheet, 
-  FileText,
-  Database 
+  FileText
 } from 'lucide-react';
 import { exportDatabaseBackup, hardResetDatabase, db } from '@/lib/db';
 import { importDataFromJson } from '@/lib/legacy-import';
@@ -222,19 +221,6 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      {/* Architecture Info Banner */}
-      <div className="flex items-start gap-3 p-4 sm:p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-200">
-        <Database className="w-6 h-6 text-indigo-500 shrink-0 mt-0.5" />
-        <div className="text-sm">
-          <h4 className="font-bold theme-text text-base">20-30 Yıllık Yüksek Performanslı Yerel Depolama</h4>
-          <p className="mt-1 theme-muted leading-relaxed">
-            Verileriniz hiçbir sunucuya (Firebase, Supabase vb.) gönderilmez; 
-            tarayıcınızın kendi <strong>IndexedDB (Dexie.js)</strong> veritabanında B-Tree indeksleri ile saklanır. 
-            On binlerce işlem girseniz dahi bellek şişmesi veya kasma yaşanmaz.
-          </p>
-        </div>
-      </div>
-
       {/* Backup and Restore Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Backup Card */}
