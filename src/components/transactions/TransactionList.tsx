@@ -9,10 +9,7 @@ import {
   ArrowUpCircle, 
   ArrowDownCircle, 
   FileSpreadsheet, 
-  FileText,
-  Flame,
-  Zap,
-  CalendarDays
+  FileText
 } from 'lucide-react';
 import { Transaction, Category } from '@/types';
 import { formatCurrency, formatRelativeDate, exportTransactionsToCSV, exportTransactionsToExcel } from '@/lib/utils';
@@ -33,8 +30,6 @@ interface TransactionListProps {
   onOpenAddModal: () => void;
 }
 
-type QuickChip = 'all' | 'high' | 'today' | 'week';
-
 export function TransactionList({
   transactions,
   categories,
@@ -51,7 +46,6 @@ export function TransactionList({
 
   const [deleteCandidate, setDeleteCandidate] = useState<Transaction | null>(null);
   const [visibleCount, setVisibleCount] = useState(25);
-  const [activeChip, setActiveChip] = useState<QuickChip>('all');
 
   const catMap = new Map<string, Category>();
   categories.forEach(c => catMap.set(c.name, c));
@@ -87,26 +81,7 @@ export function TransactionList({
     toast('📗 Excel tablosu (.xls) indirildi.', 'success');
   };
 
-  // Filter transactions based on Quick Chips
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAgoStr = weekAgo.toISOString().slice(0, 10);
-
-  const filteredByChips = transactions.filter(t => {
-    if (activeChip === 'high') {
-      return t.amount >= 1000;
-    }
-    if (activeChip === 'today') {
-      return t.date === todayStr;
-    }
-    if (activeChip === 'week') {
-      return t.date >= weekAgoStr;
-    }
-    return true;
-  });
-
-  const visibleTransactions = filteredByChips.slice(0, visibleCount);
+  const visibleTransactions = transactions.slice(0, visibleCount);
 
   return (
     <div className="flex flex-col gap-4 theme-card p-4 sm:p-6 rounded-2xl shadow-sm">
@@ -116,7 +91,7 @@ export function TransactionList({
           <h3 className="text-lg font-bold theme-text tracking-tight flex items-center gap-2">
             <span>İşlem Geçmişi</span>
             <span className="text-xs px-2 py-0.5 rounded-full theme-sub-card theme-muted font-semibold border theme-border">
-              {filteredByChips.length}
+              {transactions.length}
             </span>
           </h3>
           <p className="text-xs theme-muted mt-0.5">Seçili döneme ait kayıtlar</p>
@@ -197,56 +172,6 @@ export function TransactionList({
               Temizle
             </button>
           )}
-        </div>
-
-        {/* Quick Chips Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          <button
-            onClick={() => setActiveChip('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeChip === 'all'
-                ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/40'
-                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
-            }`}
-          >
-            <span>Tümü</span>
-          </button>
-
-          <button
-            onClick={() => setActiveChip('high')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeChip === 'high'
-                ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/40'
-                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5 text-rose-500" />
-            <span>1.000₺ Üzeri</span>
-          </button>
-
-          <button
-            onClick={() => setActiveChip('today')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeChip === 'today'
-                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40'
-                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
-            }`}
-          >
-            <Zap className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Bugün</span>
-          </button>
-
-          <button
-            onClick={() => setActiveChip('week')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeChip === 'week'
-                ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/40'
-                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
-            }`}
-          >
-            <CalendarDays className="w-3.5 h-3.5 text-purple-500" />
-            <span>Son 7 Gün</span>
-          </button>
         </div>
       </div>
 
@@ -354,12 +279,12 @@ export function TransactionList({
         )}
 
         {/* Load More Button for Scalability */}
-        {filteredByChips.length > visibleCount && (
+        {transactions.length > visibleCount && (
           <button
             onClick={() => setVisibleCount(prev => prev + 25)}
             className="w-full py-2.5 mt-2 rounded-xl theme-sub-card theme-text font-semibold text-xs border theme-border transition-colors cursor-pointer"
           >
-            Daha Fazla Göster ({filteredByChips.length - visibleCount} kalan)
+            Daha Fazla Göster ({transactions.length - visibleCount} kalan)
           </button>
         )}
       </div>

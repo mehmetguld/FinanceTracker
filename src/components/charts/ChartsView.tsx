@@ -17,17 +17,26 @@ import {
 } from 'recharts';
 import { CategoryExpenseBreakdown, FinancialSummary, Transaction } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { PieChart as PieIcon, BarChart3, TrendingDown } from 'lucide-react';
+import { PieChart as PieIcon, BarChart3, TrendingUp } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 
 interface ChartsViewProps {
-  breakdown: CategoryExpenseBreakdown[];
+  breakdown?: CategoryExpenseBreakdown[];
+  expenseBreakdown?: CategoryExpenseBreakdown[];
+  incomeBreakdown?: CategoryExpenseBreakdown[];
   summary: FinancialSummary;
   transactions: Transaction[];
 }
 
-export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps) {
+export function ChartsView({ 
+  breakdown = [], 
+  expenseBreakdown, 
+  incomeBreakdown = [], 
+  summary, 
+  transactions 
+}: ChartsViewProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [donutType, setDonutType] = useState<'expense' | 'income'>('expense');
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -49,13 +58,18 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
   const tooltipBg = isDark ? '#0f172a' : '#ffffff';
   const tooltipBorder = isDark ? '#334155' : '#cbd5e1';
 
+  // Active breakdown for Donut
+  const activeBreakdown = donutType === 'expense' 
+    ? (expenseBreakdown || breakdown) 
+    : incomeBreakdown;
+
   // Data for Bar comparison
   const comparisonData = [
     { name: 'Gelir', tutar: summary.totalIncome, fill: '#10b981' },
     { name: 'Gider', tutar: summary.totalExpense, fill: '#f43f5e' },
   ];
 
-  // Daily trend calculation
+  // Daily trend calculation for both Income & Expense
   const dailyMap: Record<string, { income: number; expense: number }> = {};
   transactions.forEach(t => {
     const day = t.date.slice(8, 10);
@@ -83,7 +97,9 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
             <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color }} />
             <span className="font-bold theme-text text-sm">{data.category}</span>
           </div>
-          <p className="text-xs text-rose-600 dark:text-rose-400 font-bold">{formatCurrency(data.amount)}</p>
+          <p className={`text-xs font-bold ${donutType === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+            {formatCurrency(data.amount)}
+          </p>
           <p className="text-[11px] theme-muted">%{data.percentage.toFixed(1)} pay</p>
         </div>
       );
@@ -108,23 +124,53 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Kategori Harcama Dağılımı (Donut) */}
+      {/* Kategori Dağılımı (Donut - Gelir & Gider Geçişli) */}
       <div className="flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
-        <div className="flex items-center justify-between pb-4 border-b theme-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b theme-border">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+            <div className={`p-2 rounded-xl ${donutType === 'expense' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
               <PieIcon className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-base font-bold theme-text">Kategori Harcama Dağılımı</h4>
-              <p className="text-xs theme-muted">Giderlerin kategorilere göre yüzdesi</p>
+              <h4 className="text-base font-bold theme-text">
+                {donutType === 'expense' ? 'Kategori Gider Dağılımı' : 'Kategori Gelir Dağılımı'}
+              </h4>
+              <p className="text-xs theme-muted">
+                {donutType === 'expense' ? 'Harcamaların kategorilere göre yüzdesi' : 'Gelir kaynaklarının kategori dağılımı'}
+              </p>
             </div>
+          </div>
+
+          {/* Gelir / Gider Toggle */}
+          <div className="flex items-center p-1 rounded-xl theme-sub-card border theme-border self-start sm:self-auto">
+            <button
+              onClick={() => setDonutType('expense')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                donutType === 'expense'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'theme-muted hover:opacity-100'
+              }`}
+            >
+              Giderler
+            </button>
+            <button
+              onClick={() => setDonutType('income')}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                donutType === 'income'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'theme-muted hover:opacity-100'
+              }`}
+            >
+              Gelirler
+            </button>
           </div>
         </div>
 
-        {breakdown.length === 0 ? (
+        {activeBreakdown.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center theme-muted text-sm">
-            Bu dönemde gösterilecek gider kaydı yok.
+            {donutType === 'expense' 
+              ? 'Bu dönemde gösterilecek gider kaydı bulunmuyor.' 
+              : 'Bu dönemde gösterilecek gelir kaydı bulunmuyor.'}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center mt-4">
@@ -132,7 +178,7 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={breakdown}
+                    data={activeBreakdown}
                     cx="50%"
                     cy="50%"
                     innerRadius={55}
@@ -140,7 +186,7 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
                     paddingAngle={3}
                     dataKey="amount"
                   >
-                    {breakdown.map((entry, index) => (
+                    {activeBreakdown.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} stroke={isDark ? '#0f172a' : '#ffffff'} strokeWidth={2} />
                     ))}
                   </Pie>
@@ -151,14 +197,16 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
 
             {/* Category Legend List */}
             <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-2">
-              {breakdown.map(item => (
+              {activeBreakdown.map(item => (
                 <div key={item.category} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                     <span className="theme-text font-medium truncate">{item.category}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold theme-text">{formatCurrency(item.amount)}</span>
+                    <span className={`font-bold ${donutType === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {formatCurrency(item.amount)}
+                    </span>
                     <span className="text-[10px] theme-muted w-9 text-right font-semibold">
                       %{item.percentage.toFixed(0)}
                     </span>
@@ -174,12 +222,12 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
       <div className="flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
         <div className="flex items-center justify-between pb-4 border-b theme-border">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-base font-bold theme-text">Gelir - Gider Karşılaştırması</h4>
-              <p className="text-xs theme-muted">Toplam nakit dengesi</p>
+              <h4 className="text-base font-bold theme-text">Gelir - Gider Dengesi</h4>
+              <p className="text-xs theme-muted">Dönemsel toplam nakit akışı karşılaştırması</p>
             </div>
           </div>
         </div>
@@ -197,17 +245,29 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
         </div>
       </div>
 
-      {/* Günlük Harcama Trendi (Area) */}
+      {/* Günlük Gelir ve Harcama Akışı (Dual Area Chart) */}
       {dailyTrendData.length > 1 && (
         <div className="lg:col-span-2 flex flex-col theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b theme-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b theme-border">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500">
-                <TrendingDown className="w-4 h-4" />
+              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+                <TrendingUp className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-base font-bold theme-text">Günlük Harcama Eğrisi</h4>
-                <p className="text-xs theme-muted">Seçili dönem boyunca harcamaların gün bazında akışı</p>
+                <h4 className="text-base font-bold theme-text">Günlük Nakit Akışı (Gelir & Gider)</h4>
+                <p className="text-xs theme-muted">Seçili dönem boyunca gün bazında gelir ve gider hareketleri</p>
+              </div>
+            </div>
+
+            {/* Legends */}
+            <div className="flex items-center gap-4 text-xs font-semibold">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                <span className="theme-text">Gelir</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-rose-500" />
+                <span className="theme-text">Gider</span>
               </div>
             </div>
           </div>
@@ -216,6 +276,10 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={dailyTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
+                  <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                  </linearGradient>
                   <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
                     <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
@@ -225,10 +289,25 @@ export function ChartsView({ breakdown, summary, transactions }: ChartsViewProps
                 <XAxis dataKey="gun" stroke={axisColor} fontSize={11} tickLine={false} />
                 <YAxis stroke={axisColor} fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
                 <Tooltip
-                  formatter={(val: any) => [formatCurrency(Number(val)), 'Harcama']}
+                  formatter={(val: any, name: any) => [formatCurrency(Number(val)), name === 'Gelir' ? 'Gelir' : 'Gider']}
                   contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '12px' }}
                 />
-                <Area type="monotone" dataKey="Harcama" stroke="#f43f5e" strokeWidth={2.5} fillOpacity={1} fill="url(#expenseGrad)" />
+                <Area 
+                  type="monotone" 
+                  dataKey="Gelir" 
+                  stroke="#10b981" 
+                  strokeWidth={2.5} 
+                  fillOpacity={1} 
+                  fill="url(#incomeGrad)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="Harcama" 
+                  stroke="#f43f5e" 
+                  strokeWidth={2.5} 
+                  fillOpacity={1} 
+                  fill="url(#expenseGrad)" 
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>

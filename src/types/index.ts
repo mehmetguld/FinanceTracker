@@ -24,7 +24,7 @@ export interface AppSetting {
   value: any;
 }
 
-export type PeriodFilter = 'month' | 'week' | 'year' | 'all' | 'custom' | 'day';
+export type PeriodFilter = 'today' | 'month' | 'week' | 'year' | 'all' | 'custom' | 'day';
 
 export interface DateRange {
   start: string; // YYYY-MM-DD

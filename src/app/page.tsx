@@ -43,7 +43,8 @@ export default function DashboardPage() {
     balance: 0,
     transactionCount: 0,
   });
-  const [breakdown, setBreakdown] = useState<CategoryExpenseBreakdown[]>([]);
+  const [expenseBreakdown, setExpenseBreakdown] = useState<CategoryExpenseBreakdown[]>([]);
+  const [incomeBreakdown, setIncomeBreakdown] = useState<CategoryExpenseBreakdown[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -55,12 +56,16 @@ export default function DashboardPage() {
         getSummaryMetrics(periodState),
       ]);
 
-      const catBreakdown = await getCategoryBreakdown(periodState, cats);
+      const [expBreakdown, incBreakdown] = await Promise.all([
+        getCategoryBreakdown(periodState, cats, 'expense'),
+        getCategoryBreakdown(periodState, cats, 'income'),
+      ]);
 
       setCategories(cats);
       setTransactions(trans);
       setSummary(sum);
-      setBreakdown(catBreakdown);
+      setExpenseBreakdown(expBreakdown);
+      setIncomeBreakdown(incBreakdown);
     } catch (err) {
       console.error('Veri yükleme hatası:', err);
     } finally {
@@ -108,12 +113,14 @@ export default function DashboardPage() {
       <SmartInsights
         summary={summary}
         transactions={transactions}
-        breakdown={breakdown}
+        breakdown={expenseBreakdown}
       />
 
       {/* Visual Charts */}
       <ChartsView
-        breakdown={breakdown}
+        breakdown={expenseBreakdown}
+        expenseBreakdown={expenseBreakdown}
+        incomeBreakdown={incomeBreakdown}
         summary={summary}
         transactions={transactions}
       />

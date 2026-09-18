@@ -55,7 +55,7 @@ export async function getTransactionsByPeriod(
 
   if (period.type === 'month') {
     collection = db.transactions.where('yearMonth').equals(period.yearMonth);
-  } else if (period.type === 'day' && period.selectedDay) {
+  } else if ((period.type === 'today' || period.type === 'day') && period.selectedDay) {
     collection = db.transactions.where('date').equals(period.selectedDay);
   } else if (period.type === 'week' && period.customRange) {
     collection = db.transactions.where('date').between(period.customRange.start, period.customRange.end, true, true);
@@ -108,34 +108,35 @@ export async function getSummaryMetrics(period: PeriodState): Promise<FinancialS
 }
 
 /**
- * Calculates category breakdown for expense visualization
+ * Calculates category breakdown for expense or income visualization
  */
 export async function getCategoryBreakdown(
   period: PeriodState,
-  categories: Category[]
+  categories: Category[],
+  type: 'expense' | 'income' = 'expense'
 ): Promise<CategoryExpenseBreakdown[]> {
-  const transactions = await getTransactionsByPeriod(period, 'expense');
+  const transactions = await getTransactionsByPeriod(period, type);
   const catMap = new Map<string, Category>();
   categories.forEach(c => catMap.set(c.name, c));
 
-  const totalExpense = transactions.reduce((sum, t) => sum + t.amount, 0);
-  const expenseByCategory: Record<string, { amount: number; count: number }> = {};
+  const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const amountByCategory: Record<string, { amount: number; count: number }> = {};
 
   for (const t of transactions) {
-    if (!expenseByCategory[t.category]) {
-      expenseByCategory[t.category] = { amount: 0, count: 0 };
+    if (!amountByCategory[t.category]) {
+      amountByCategory[t.category] = { amount: 0, count: 0 };
     }
-    expenseByCategory[t.category].amount += t.amount;
-    expenseByCategory[t.category].count += 1;
+    amountByCategory[t.category].amount += t.amount;
+    amountByCategory[t.category].count += 1;
   }
 
-  const breakdown: CategoryExpenseBreakdown[] = Object.entries(expenseByCategory).map(([category, stats]) => {
+  const breakdown: CategoryExpenseBreakdown[] = Object.entries(amountByCategory).map(([category, stats]) => {
     const catObj = catMap.get(category);
     return {
       category,
       amount: stats.amount,
       color: catObj?.color || '#94a3b8',
-      percentage: totalExpense > 0 ? (stats.amount / totalExpense) * 100 : 0,
+      percentage: totalAmount > 0 ? (stats.amount / totalAmount) * 100 : 0,
       count: stats.count,
     };
   });

@@ -38,7 +38,14 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
   };
 
   const setFilterType = (type: PeriodFilter) => {
-    if (type === 'month') {
+    if (type === 'today') {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      onPeriodChange({
+        type: 'today',
+        yearMonth: todayStr.slice(0, 7),
+        selectedDay: todayStr,
+      });
+    } else if (type === 'month') {
       onPeriodChange({
         type: 'month',
         yearMonth: getCurrentYearMonth(),
@@ -105,6 +112,7 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
   };
 
   const filterTabs: { id: PeriodFilter; label: string }[] = [
+    { id: 'today', label: '⚡ Bugün' },
     { id: 'month', label: 'Bu Ay' },
     { id: 'week', label: 'Bu Hafta' },
     { id: 'year', label: 'Bu Yıl' },
@@ -140,6 +148,11 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
               <ChevronRight className="w-5 h-5" />
             </button>
           </>
+        ) : periodState.type === 'today' ? (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-sm font-semibold">
+            <Clock className="w-4 h-4" />
+            <span>Bugün ({formatDate(periodState.selectedDay || new Date().toISOString().slice(0, 10))})</span>
+          </div>
         ) : periodState.type === 'day' && periodState.selectedDay ? (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-sm font-semibold">
             <Clock className="w-4 h-4" />
