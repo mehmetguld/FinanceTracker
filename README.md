@@ -84,25 +84,6 @@ En büyük farkı ise mimarisindedir: **Verileriniz hiçbir uzak sunucuya, bulut
 | `Ctrl + N` / `Cmd + N` | Herhangi bir sayfadayken anında **Yeni İşlem Ekle** penceresini açar |
 | `Escape` | Açık olan modal pencerelerini veya menüleri kapatır |
 
----
-
-## 🚀 Hızlı Başlangıç
-
-Projeyi kendi bilgisayarınızda çalıştırmak için yalnızca 3 basit adım yeterlidir:
-
-```bash
-# 1. Projeyi bilgisayarınıza indirin
-git clone https://github.com/mehmetguld/FinanceTracker.git
-cd FinanceTracker
-
-# 2. Gerekli paketleri kurun
-npm install
-
-# 3. Uygulamayı başlatın
-npm run dev
-```
-
-Ardından tarayıcınızdan **`http://localhost:3000`** adresine giderek hemen kullanmaya başlayabilirsiniz!
 
 ---
 
