@@ -14,9 +14,12 @@ import {
   Settings, 
   Menu, 
   X,
-  Sparkles
+  Sparkles,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { usePrivacy } from '@/context/PrivacyContext';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
@@ -25,6 +28,7 @@ interface NavbarProps {
 export function Navbar({ onOpenAddModal }: NavbarProps) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { isPrivate, togglePrivacy } = usePrivacy();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -85,6 +89,19 @@ export function Navbar({ onOpenAddModal }: NavbarProps) {
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span className="hidden sm:inline">İşlem Ekle</span>
+            </button>
+
+            {/* Privacy Mode Toggle Button */}
+            <button
+              onClick={togglePrivacy}
+              className="p-2.5 rounded-xl theme-sub-card border theme-border hover:opacity-80 transition-all cursor-pointer"
+              title={isPrivate ? 'Bakiyeleri Göster' : 'Bakiyeleri Gizle (Gizlilik Modu)'}
+            >
+              {isPrivate ? (
+                <EyeOff className="w-4 h-4 text-amber-500" />
+              ) : (
+                <Eye className="w-4 h-4 theme-muted" />
+              )}
             </button>
 
             {/* Theme Toggle Button */}

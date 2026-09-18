@@ -5,6 +5,7 @@ import { motion, type Variants } from 'framer-motion';
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { FinancialSummary } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { usePrivacy } from '@/context/PrivacyContext';
 
 interface SummaryCardsProps {
   summary: FinancialSummary;
@@ -12,6 +13,7 @@ interface SummaryCardsProps {
 
 export function SummaryCards({ summary }: SummaryCardsProps) {
   const { totalIncome, totalExpense, balance, transactionCount } = summary;
+  const { formatPrivate } = usePrivacy();
 
   const savingsRate = totalIncome > 0 ? Math.max(0, ((totalIncome - totalExpense) / totalIncome) * 100) : 0;
 
@@ -42,7 +44,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         </div>
         <div className="mt-4">
           <div className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight">
-            {formatCurrency(totalIncome)}
+            {formatPrivate(formatCurrency(totalIncome))}
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
             <ArrowUpRight className="w-4 h-4" />
@@ -68,7 +70,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         </div>
         <div className="mt-4">
           <div className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight">
-            {formatCurrency(totalExpense)}
+            {formatPrivate(formatCurrency(totalExpense))}
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400">
             <ArrowDownRight className="w-4 h-4" />
@@ -94,7 +96,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         </div>
         <div className="mt-4">
           <div className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${balance >= 0 ? 'theme-text' : 'text-rose-600 dark:text-rose-400'}`}>
-            {formatCurrency(balance)}
+            {formatPrivate(formatCurrency(balance))}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs theme-muted">
             <span>{transactionCount} işlem kaydedildi</span>

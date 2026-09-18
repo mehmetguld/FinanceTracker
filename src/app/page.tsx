@@ -5,6 +5,7 @@ import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { PeriodSelector } from '@/components/dashboard/PeriodSelector';
 import { TransactionList } from '@/components/transactions/TransactionList';
 import { ChartsView } from '@/components/charts/ChartsView';
+import { SmartInsights } from '@/components/dashboard/SmartInsights';
 import { 
   db, 
   ensureInitialized, 
@@ -102,6 +103,13 @@ export default function DashboardPage() {
 
       {/* Hero Summary Cards */}
       <SummaryCards summary={summary} />
+
+      {/* Smart Financial Insights (AI Analysis) */}
+      <SmartInsights
+        summary={summary}
+        transactions={transactions}
+        breakdown={breakdown}
+      />
 
       {/* Visual Charts */}
       <ChartsView

@@ -2,12 +2,24 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Trash2, Edit3, ArrowUpCircle, ArrowDownCircle, FileSpreadsheet, FileText } from 'lucide-react';
+import { 
+  Search, 
+  Trash2, 
+  Edit3, 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  FileSpreadsheet, 
+  FileText,
+  Flame,
+  Zap,
+  CalendarDays
+} from 'lucide-react';
 import { Transaction, Category } from '@/types';
 import { formatCurrency, formatRelativeDate, exportTransactionsToCSV, exportTransactionsToExcel } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { db } from '@/lib/db';
 import { useToast } from '@/components/ui/Toast';
+import { usePrivacy } from '@/context/PrivacyContext';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -21,6 +33,8 @@ interface TransactionListProps {
   onOpenAddModal: () => void;
 }
 
+type QuickChip = 'all' | 'high' | 'today' | 'week';
+
 export function TransactionList({
   transactions,
   categories,
@@ -33,8 +47,11 @@ export function TransactionList({
   onOpenAddModal,
 }: TransactionListProps) {
   const { toast } = useToast();
+  const { formatPrivate } = usePrivacy();
+
   const [deleteCandidate, setDeleteCandidate] = useState<Transaction | null>(null);
   const [visibleCount, setVisibleCount] = useState(25);
+  const [activeChip, setActiveChip] = useState<QuickChip>('all');
 
   const catMap = new Map<string, Category>();
   categories.forEach(c => catMap.set(c.name, c));
@@ -70,7 +87,26 @@ export function TransactionList({
     toast('📗 Excel tablosu (.xls) indirildi.', 'success');
   };
 
-  const visibleTransactions = transactions.slice(0, visibleCount);
+  // Filter transactions based on Quick Chips
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+
+  const filteredByChips = transactions.filter(t => {
+    if (activeChip === 'high') {
+      return t.amount >= 1000;
+    }
+    if (activeChip === 'today') {
+      return t.date === todayStr;
+    }
+    if (activeChip === 'week') {
+      return t.date >= weekAgoStr;
+    }
+    return true;
+  });
+
+  const visibleTransactions = filteredByChips.slice(0, visibleCount);
 
   return (
     <div className="flex flex-col gap-4 theme-card p-4 sm:p-6 rounded-2xl shadow-sm">
@@ -80,7 +116,7 @@ export function TransactionList({
           <h3 className="text-lg font-bold theme-text tracking-tight flex items-center gap-2">
             <span>İşlem Geçmişi</span>
             <span className="text-xs px-2 py-0.5 rounded-full theme-sub-card theme-muted font-semibold border theme-border">
-              {transactions.length}
+              {filteredByChips.length}
             </span>
           </h3>
           <p className="text-xs theme-muted mt-0.5">Seçili döneme ait kayıtlar</p>
@@ -142,24 +178,76 @@ export function TransactionList({
         </div>
       </div>
 
-      {/* Live Search Input */}
-      <div className="relative">
-        <Search className="w-4 h-4 theme-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          placeholder="Açıklama veya kategori ara..."
-          value={searchQuery}
-          onChange={e => onSearchQueryChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl theme-input border theme-border text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-        />
-        {searchQuery && (
+      {/* Live Search Input & Quick Filter Chips */}
+      <div className="flex flex-col gap-2.5">
+        <div className="relative">
+          <Search className="w-4 h-4 theme-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Açıklama veya kategori ara..."
+            value={searchQuery}
+            onChange={e => onSearchQueryChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl theme-input border theme-border text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchQueryChange('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs theme-muted hover:opacity-100 theme-sub-card px-2 py-0.5 rounded-md cursor-pointer"
+            >
+              Temizle
+            </button>
+          )}
+        </div>
+
+        {/* Quick Chips Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
           <button
-            onClick={() => onSearchQueryChange('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs theme-muted hover:opacity-100 theme-sub-card px-2 py-0.5 rounded-md"
+            onClick={() => setActiveChip('all')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeChip === 'all'
+                ? 'bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/40'
+                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
+            }`}
           >
-            Temizle
+            <span>Tümü</span>
           </button>
-        )}
+
+          <button
+            onClick={() => setActiveChip('high')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeChip === 'high'
+                ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/40'
+                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-rose-500" />
+            <span>1.000₺ Üzeri</span>
+          </button>
+
+          <button
+            onClick={() => setActiveChip('today')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeChip === 'today'
+                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40'
+                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Bugün</span>
+          </button>
+
+          <button
+            onClick={() => setActiveChip('week')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeChip === 'week'
+                ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/40'
+                : 'theme-sub-card theme-muted hover:opacity-100 border theme-border'
+            }`}
+          >
+            <CalendarDays className="w-3.5 h-3.5 text-purple-500" />
+            <span>Son 7 Gün</span>
+          </button>
+        </div>
       </div>
 
       {/* Transactions Feed */}
@@ -171,7 +259,7 @@ export function TransactionList({
             </div>
             <p className="text-base font-semibold theme-text">İşlem Bulunamadı</p>
             <p className="text-xs theme-muted mt-1 max-w-xs">
-              Bu dönemde kayıtlı bir gelir/gider yok veya aramanızla eşleşmedi.
+              Bu kriterlere uyan kayıt bulunamadı.
             </p>
             <button
               onClick={onOpenAddModal}
@@ -185,6 +273,7 @@ export function TransactionList({
             {visibleTransactions.map(t => {
               const cat = catMap.get(t.category);
               const catColor = cat?.color || '#94a3b8';
+              const formattedAmt = formatPrivate((t.type === 'income' ? '+' : '-') + formatCurrency(t.amount));
 
               return (
                 <motion.div
@@ -238,8 +327,7 @@ export function TransactionList({
                         t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                       }`}
                     >
-                      {t.type === 'income' ? '+' : '-'}
-                      {formatCurrency(t.amount)}
+                      {formattedAmt}
                     </span>
 
                     <div className="flex items-center gap-1 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -266,12 +354,12 @@ export function TransactionList({
         )}
 
         {/* Load More Button for Scalability */}
-        {transactions.length > visibleCount && (
+        {filteredByChips.length > visibleCount && (
           <button
             onClick={() => setVisibleCount(prev => prev + 25)}
             className="w-full py-2.5 mt-2 rounded-xl theme-sub-card theme-text font-semibold text-xs border theme-border transition-colors cursor-pointer"
           >
-            Daha Fazla Göster ({transactions.length - visibleCount} kalan)
+            Daha Fazla Göster ({filteredByChips.length - visibleCount} kalan)
           </button>
         )}
       </div>

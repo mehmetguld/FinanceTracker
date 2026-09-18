@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastProvider } from '@/components/ui/Toast';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { PrivacyProvider } from '@/context/PrivacyContext';
 import { ModalProvider, useGlobalModal } from '@/context/ModalContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
@@ -62,11 +63,13 @@ function InnerApp({ children }: { children: React.ReactNode }) {
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <ModalProvider>
-          <InnerApp>{children}</InnerApp>
-        </ModalProvider>
-      </ToastProvider>
+      <PrivacyProvider>
+        <ToastProvider>
+          <ModalProvider>
+            <InnerApp>{children}</InnerApp>
+          </ModalProvider>
+        </ToastProvider>
+      </PrivacyProvider>
     </ThemeProvider>
   );
 }
