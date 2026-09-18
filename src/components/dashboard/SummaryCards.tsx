@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from '
 import { FinancialSummary } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SummaryCardsProps {
   summary: FinancialSummary;
@@ -14,6 +15,7 @@ interface SummaryCardsProps {
 export function SummaryCards({ summary }: SummaryCardsProps) {
   const { totalIncome, totalExpense, balance, transactionCount } = summary;
   const { formatPrivate } = usePrivacy();
+  const { t, language } = useLanguage();
 
   const savingsRate = totalIncome > 0 ? Math.max(0, ((totalIncome - totalExpense) / totalIncome) * 100) : 0;
 
@@ -34,10 +36,14 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-all duration-300"
+        whileHover={{ y: -3 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-emerald-500 transition-shadow duration-300 hover:shadow-2xl"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Toplam Gelir</span>
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+            {t('dashboard.totalIncome')}
+          </span>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <TrendingUp className="w-5 h-5" />
           </div>
@@ -48,7 +54,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
             <ArrowUpRight className="w-4 h-4" />
-            <span>Kayıtlı gelen fonlar</span>
+            <span>{language === 'tr' ? 'Kayıtlı gelen fonlar' : 'Recorded cash inflow'}</span>
           </div>
         </div>
         <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -60,10 +66,14 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-rose-500 hover:-translate-y-1 transition-all duration-300"
+        whileHover={{ y: -3 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-rose-500 transition-shadow duration-300 hover:shadow-2xl"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Toplam Gider</span>
+          <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+            {t('dashboard.totalExpense')}
+          </span>
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <TrendingDown className="w-5 h-5" />
           </div>
@@ -74,7 +84,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400">
             <ArrowDownRight className="w-4 h-4" />
-            <span>Harcanan toplam bütçe</span>
+            <span>{language === 'tr' ? 'Harcanan toplam bütçe' : 'Total spent budget'}</span>
           </div>
         </div>
         <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -86,10 +96,14 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         initial="hidden"
         animate="visible"
         variants={cardVariants}
-        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-indigo-500 hover:-translate-y-1 transition-all duration-300"
+        whileHover={{ y: -3 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="relative overflow-hidden rounded-2xl theme-card p-5 sm:p-6 shadow-xl border-l-4 border-l-indigo-500 transition-shadow duration-300 hover:shadow-2xl"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Net Bakiye</span>
+          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+            {t('dashboard.netBalance')}
+          </span>
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Wallet className="w-5 h-5" />
           </div>
@@ -99,10 +113,10 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
             {formatPrivate(formatCurrency(balance))}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs theme-muted">
-            <span>{transactionCount} işlem kaydedildi</span>
+            <span>{transactionCount} {t('dashboard.countUnit')}</span>
             {totalIncome > 0 && (
               <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                %{savingsRate.toFixed(0)} Tasarruf
+                %{savingsRate.toFixed(0)} {language === 'tr' ? 'Tasarruf' : 'Saved'}
               </span>
             )}
           </div>

@@ -19,6 +19,7 @@ import { CategoryExpenseBreakdown, FinancialSummary, Transaction } from '@/types
 import { formatCurrency } from '@/lib/utils';
 import { PieChart as PieIcon, BarChart3, TrendingUp } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ChartsViewProps {
   breakdown?: CategoryExpenseBreakdown[];
@@ -38,6 +39,7 @@ export function ChartsView({
   const [isMounted, setIsMounted] = useState(false);
   const [donutType, setDonutType] = useState<'expense' | 'income'>('expense');
   const { theme } = useTheme();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     setIsMounted(true);
@@ -65,8 +67,8 @@ export function ChartsView({
 
   // Data for Bar comparison
   const comparisonData = [
-    { name: 'Gelir', tutar: summary.totalIncome, fill: '#10b981' },
-    { name: 'Gider', tutar: summary.totalExpense, fill: '#f43f5e' },
+    { name: t('charts.incomeLegend'), tutar: summary.totalIncome, fill: '#10b981' },
+    { name: t('charts.expenseLegend'), tutar: summary.totalExpense, fill: '#f43f5e' },
   ];
 
   // Daily trend calculation for both Income & Expense
@@ -83,7 +85,7 @@ export function ChartsView({
   const dailyTrendData = Object.keys(dailyMap)
     .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
     .map(day => ({
-      gun: `${day}. Gün`,
+      gun: language === 'tr' ? `${day}. Gün` : `Day ${day}`,
       Harcama: dailyMap[day].expense,
       Gelir: dailyMap[day].income,
     }));
@@ -100,7 +102,7 @@ export function ChartsView({
           <p className={`text-xs font-bold ${donutType === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
             {formatCurrency(data.amount)}
           </p>
-          <p className="text-[11px] theme-muted">%{data.percentage.toFixed(1)} pay</p>
+          <p className="text-[11px] theme-muted">%{data.percentage.toFixed(1)} {t('charts.share')}</p>
         </div>
       );
     }
@@ -110,10 +112,11 @@ export function ChartsView({
   const CustomBarTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const isIncome = data.name === t('charts.incomeLegend');
       return (
         <div className="p-3 theme-card rounded-xl shadow-xl border">
           <span className="font-bold theme-text text-sm">{data.name}</span>
-          <p className={`text-xs font-bold mt-0.5 ${data.name === 'Gelir' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <p className={`text-xs font-bold mt-0.5 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {formatCurrency(data.tutar)}
           </p>
         </div>
@@ -133,10 +136,10 @@ export function ChartsView({
             </div>
             <div>
               <h4 className="text-base font-bold theme-text">
-                {donutType === 'expense' ? 'Kategori Gider Dağılımı' : 'Kategori Gelir Dağılımı'}
+                {donutType === 'expense' ? t('charts.expenseBreakdownTitle') : t('charts.incomeBreakdownTitle')}
               </h4>
               <p className="text-xs theme-muted">
-                {donutType === 'expense' ? 'Harcamaların kategorilere göre yüzdesi' : 'Gelir kaynaklarının kategori dağılımı'}
+                {donutType === 'expense' ? t('charts.expenseBreakdownSub') : t('charts.incomeBreakdownSub')}
               </p>
             </div>
           </div>
@@ -145,23 +148,23 @@ export function ChartsView({
           <div className="flex items-center p-1 rounded-xl theme-sub-card border theme-border self-start sm:self-auto">
             <button
               onClick={() => setDonutType('expense')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 donutType === 'expense'
                   ? 'bg-rose-600 text-white shadow-sm'
                   : 'theme-muted hover:opacity-100'
               }`}
             >
-              Giderler
+              {t('charts.expensesTab')}
             </button>
             <button
               onClick={() => setDonutType('income')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 donutType === 'income'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'theme-muted hover:opacity-100'
               }`}
             >
-              Gelirler
+              {t('charts.incomeTab')}
             </button>
           </div>
         </div>
@@ -169,8 +172,8 @@ export function ChartsView({
         {activeBreakdown.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center theme-muted text-sm">
             {donutType === 'expense' 
-              ? 'Bu dönemde gösterilecek gider kaydı bulunmuyor.' 
-              : 'Bu dönemde gösterilecek gelir kaydı bulunmuyor.'}
+              ? t('charts.noExpenseData') 
+              : t('charts.noIncomeData')}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center mt-4">
@@ -226,8 +229,8 @@ export function ChartsView({
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-base font-bold theme-text">Gelir - Gider Dengesi</h4>
-              <p className="text-xs theme-muted">Dönemsel toplam nakit akışı karşılaştırması</p>
+              <h4 className="text-base font-bold theme-text">{t('charts.balanceTitle')}</h4>
+              <p className="text-xs theme-muted">{t('charts.balanceSub')}</p>
             </div>
           </div>
         </div>
@@ -254,8 +257,8 @@ export function ChartsView({
                 <TrendingUp className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-base font-bold theme-text">Günlük Nakit Akışı (Gelir & Gider)</h4>
-                <p className="text-xs theme-muted">Seçili dönem boyunca gün bazında gelir ve gider hareketleri</p>
+                <h4 className="text-base font-bold theme-text">{t('charts.cashFlowTitle')}</h4>
+                <p className="text-xs theme-muted">{t('charts.cashFlowSub')}</p>
               </div>
             </div>
 
@@ -263,11 +266,11 @@ export function ChartsView({
             <div className="flex items-center gap-4 text-xs font-semibold">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span className="theme-text">Gelir</span>
+                <span className="theme-text">{t('charts.incomeLegend')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-rose-500" />
-                <span className="theme-text">Gider</span>
+                <span className="theme-text">{t('charts.expenseLegend')}</span>
               </div>
             </div>
           </div>
@@ -289,7 +292,10 @@ export function ChartsView({
                 <XAxis dataKey="gun" stroke={axisColor} fontSize={11} tickLine={false} />
                 <YAxis stroke={axisColor} fontSize={11} tickFormatter={v => `₺${v}`} tickLine={false} />
                 <Tooltip
-                  formatter={(val: any, name: any) => [formatCurrency(Number(val)), name === 'Gelir' ? 'Gelir' : 'Gider']}
+                  formatter={(val: any, name: any) => [
+                    formatCurrency(Number(val)), 
+                    name === 'Gelir' ? t('charts.incomeLegend') : t('charts.expenseLegend')
+                  ]}
                   contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '12px' }}
                 />
                 <Area 

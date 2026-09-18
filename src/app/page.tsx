@@ -22,10 +22,12 @@ import {
 } from '@/types';
 import { getCurrentYearMonth } from '@/lib/utils';
 import { useGlobalModal } from '@/context/ModalContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Plus, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
   const { openAddModal, refreshTrigger } = useGlobalModal();
+  const { t } = useLanguage();
 
   const [periodState, setPeriodState] = useState<PeriodState>({
     type: 'month',
@@ -83,20 +85,20 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
-            <span>Finansal Özet</span>
+            <span>{t('dashboard.title')}</span>
             <Sparkles className="w-5 h-5 text-indigo-500" />
           </h1>
           <p className="text-xs sm:text-sm theme-muted mt-1">
-            Gelir ve giderlerinizi anlık olarak takip edin, bütçenizi yönetin.
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
         <button
           onClick={() => openAddModal()}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-5 h-5 stroke-[2.5]" />
-          <span>Yeni İşlem Ekle</span>
+          <span>{t('dashboard.newTransaction')}</span>
         </button>
       </div>
 

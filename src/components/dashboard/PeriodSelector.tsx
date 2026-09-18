@@ -6,6 +6,7 @@ import { PeriodState, PeriodFilter } from '@/types';
 import { formatMonthName, getPreviousMonth, getNextMonth, getCurrentWeekRange, getCurrentYearMonth, formatDate } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PeriodSelectorProps {
   periodState: PeriodState;
@@ -14,6 +15,7 @@ interface PeriodSelectorProps {
 
 export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorProps) {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const [customModalOpen, setCustomModalOpen] = useState(false);
   const [dayModalOpen, setDayModalOpen] = useState(false);
 
@@ -78,11 +80,11 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
   const applyCustomRange = (e: React.FormEvent) => {
     e.preventDefault();
     if (!startDate || !endDate) {
-      toast('Lütfen başlangıç ve bitiş tarihlerini girin.', 'warning');
+      toast(t('period.dateRangeWarning'), 'warning');
       return;
     }
     if (new Date(startDate) > new Date(endDate)) {
-      toast('Başlangıç tarihi bitiş tarihinden sonra olamaz.', 'error');
+      toast(t('period.dateOrderWarning'), 'error');
       return;
     }
 
@@ -92,13 +94,13 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
       customRange: { start: startDate, end: endDate },
     });
     setCustomModalOpen(false);
-    toast(`${formatDate(startDate)} - ${formatDate(endDate)} aralığı gösteriliyor.`);
+    toast(`${formatDate(startDate)} - ${formatDate(endDate)}`);
   };
 
   const applyGoToDay = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDay) {
-      toast('Lütfen bir gün seçin.', 'warning');
+      toast(t('period.dayWarning'), 'warning');
       return;
     }
 
@@ -108,17 +110,17 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
       selectedDay,
     });
     setDayModalOpen(false);
-    toast(`${formatDate(selectedDay)} günü gösteriliyor.`);
+    toast(`${formatDate(selectedDay)}`);
   };
 
   const filterTabs: { id: PeriodFilter; label: string }[] = [
-    { id: 'today', label: '⚡ Bugün' },
-    { id: 'month', label: 'Bu Ay' },
-    { id: 'week', label: 'Bu Hafta' },
-    { id: 'year', label: 'Bu Yıl' },
-    { id: 'all', label: 'Tüm Zamanlar' },
-    { id: 'custom', label: 'Özel Aralık' },
-    { id: 'day', label: 'Güne Git' },
+    { id: 'today', label: t('period.today') },
+    { id: 'month', label: t('period.thisMonth') },
+    { id: 'week', label: t('period.thisWeek') },
+    { id: 'year', label: t('period.thisYear') },
+    { id: 'all', label: t('period.allTime') },
+    { id: 'custom', label: t('period.customRange') },
+    { id: 'day', label: t('period.goToDay') },
   ];
 
   return (
@@ -129,8 +131,8 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
           <>
             <button
               onClick={handlePrevMonth}
-              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer"
-              title="Önceki Ay"
+              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer active:scale-95"
+              title={t('period.prevMonth')}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -142,8 +144,8 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
             </div>
             <button
               onClick={handleNextMonth}
-              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer"
-              title="Sonraki Ay"
+              className="p-2 rounded-xl theme-sub-card hover:opacity-80 theme-text transition-colors cursor-pointer active:scale-95"
+              title={t('period.nextMonth')}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -151,7 +153,7 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
         ) : periodState.type === 'today' ? (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-sm font-semibold">
             <Clock className="w-4 h-4" />
-            <span>Bugün ({formatDate(periodState.selectedDay || new Date().toISOString().slice(0, 10))})</span>
+            <span>{t('period.todayLabel')} ({formatDate(periodState.selectedDay || new Date().toISOString().slice(0, 10))})</span>
           </div>
         ) : periodState.type === 'day' && periodState.selectedDay ? (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-sm font-semibold">
@@ -166,7 +168,13 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
         ) : (
           <div className="flex items-center gap-2 px-3 py-2 theme-muted text-sm font-medium">
             <CalendarIcon className="w-4 h-4 text-slate-400" />
-            <span>{periodState.type === 'week' ? 'Bu Haftanın Kayıtları' : periodState.type === 'year' ? `${periodState.yearMonth.slice(0, 4)} Yılı` : 'Tüm Kayıtlar'}</span>
+            <span>
+              {periodState.type === 'week' 
+                ? t('period.weekRecords') 
+                : periodState.type === 'year' 
+                ? `${periodState.yearMonth.slice(0, 4)} ${t('period.yearRecords')}` 
+                : t('period.allRecords')}
+            </span>
           </div>
         )}
       </div>
@@ -179,7 +187,7 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                   : 'theme-muted hover:opacity-100 hover:bg-slate-500/10'
@@ -192,72 +200,72 @@ export function PeriodSelector({ periodState, onPeriodChange }: PeriodSelectorPr
       </div>
 
       {/* Custom Date Modal */}
-      <Modal isOpen={customModalOpen} onClose={() => setCustomModalOpen(false)} title="📅 Özel Tarih Aralığı">
+      <Modal isOpen={customModalOpen} onClose={() => setCustomModalOpen(false)} title={t('period.customModalTitle')}>
         <form onSubmit={applyCustomRange} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Başlangıç Tarihi</label>
+            <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">{t('period.startDate')}</label>
             <input
               type="date"
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text focus:outline-none focus:border-indigo-500 cursor-pointer"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Bitiş Tarihi</label>
+            <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">{t('period.endDate')}</label>
             <input
               type="date"
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text focus:outline-none focus:border-indigo-500 cursor-pointer"
             />
           </div>
           <div className="flex items-center justify-end gap-3 mt-4">
             <button
               type="button"
               onClick={() => setCustomModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl theme-sub-card border theme-border theme-text text-sm font-medium hover:opacity-80 cursor-pointer active:scale-95"
             >
-              İptal
+              {t('period.cancel')}
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer active:scale-95"
             >
-              Uygula
+              {t('period.apply')}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* Go To Day Modal */}
-      <Modal isOpen={dayModalOpen} onClose={() => setDayModalOpen(false)} title="🗓️ Belirli Güne Git">
+      <Modal isOpen={dayModalOpen} onClose={() => setDayModalOpen(false)} title={t('period.dayModalTitle')}>
         <form onSubmit={applyGoToDay} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Tarih Seçin</label>
+            <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">{t('period.selectDate')}</label>
             <input
               type="date"
               value={selectedDay}
               onChange={e => setSelectedDay(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text focus:outline-none focus:border-indigo-500 cursor-pointer"
             />
           </div>
           <div className="flex items-center justify-end gap-3 mt-4">
             <button
               type="button"
               onClick={() => setDayModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl theme-sub-card border theme-border theme-text text-sm font-medium hover:opacity-80 cursor-pointer active:scale-95"
             >
-              İptal
+              {t('period.cancel')}
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer active:scale-95"
             >
-              Güne Git
+              {t('period.goToDay')}
             </button>
           </div>
         </form>

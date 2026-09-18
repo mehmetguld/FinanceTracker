@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Receipt, Plus, PieChart, Settings } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface BottomNavigationProps {
   onOpenAddModal: () => void;
@@ -11,13 +12,14 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ onOpenAddModal }: BottomNavigationProps) {
   const pathname = usePathname();
+  const { t, language } = useLanguage();
 
   const navItems = [
-    { href: '/', label: 'Özet', icon: LayoutDashboard },
-    { href: '/transactions', label: 'İşlemler', icon: Receipt },
-    { isAction: true, label: 'Ekle', icon: Plus, onClick: onOpenAddModal },
-    { href: '/analytics', label: 'Grafikler', icon: PieChart },
-    { href: '/settings', label: 'Ayarlar', icon: Settings },
+    { href: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { href: '/transactions', label: t('nav.transactions'), icon: Receipt },
+    { isAction: true, label: language === 'tr' ? 'Ekle' : 'Add', icon: Plus, onClick: onOpenAddModal },
+    { href: '/analytics', label: t('nav.analytics'), icon: PieChart },
+    { href: '/settings', label: t('nav.settings'), icon: Settings },
   ];
 
   return (

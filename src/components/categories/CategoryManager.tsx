@@ -6,6 +6,7 @@ import { db, deleteCategoryWithTransactions, renameCategory } from '@/lib/db';
 import { formatCurrency, getCurrentYearMonth, formatMonthName } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
+import { useLanguage } from '@/context/LanguageContext';
 import { Plus, Edit2, Trash2, Tag, AlertTriangle, TrendingUp, TrendingDown, ArrowUpDown, Filter } from 'lucide-react';
 
 interface CategoryManagerProps {
@@ -16,8 +17,9 @@ interface CategoryManagerProps {
 
 export function CategoryManager({ categories, transactions, onRefresh }: CategoryManagerProps) {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
 
-  // Period Filter: 'all' (Tüm Zamanlar) vs 'month' (Bu Ay)
+  // Period Filter: 'all' vs 'month'
   const [filterPeriod, setFilterPeriod] = useState<'all' | 'month'>('all');
   const currentMonth = getCurrentYearMonth();
 
@@ -37,7 +39,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
 
   // Filter transactions based on selected view mode
   const targetTransactions = filterPeriod === 'month'
-    ? transactions.filter(t => t.yearMonth === currentMonth)
+    ? transactions.filter(tItem => tItem.yearMonth === currentMonth)
     : transactions;
 
   // Calculate detailed stats per category: income, expense, net, count
@@ -47,16 +49,16 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
     categoryStats[c.name] = { income: 0, expense: 0, count: 0 };
   });
 
-  targetTransactions.forEach(t => {
-    if (!categoryStats[t.category]) {
-      categoryStats[t.category] = { income: 0, expense: 0, count: 0 };
+  targetTransactions.forEach(tItem => {
+    if (!categoryStats[tItem.category]) {
+      categoryStats[tItem.category] = { income: 0, expense: 0, count: 0 };
     }
-    if (t.type === 'income') {
-      categoryStats[t.category].income += t.amount;
+    if (tItem.type === 'income') {
+      categoryStats[tItem.category].income += tItem.amount;
     } else {
-      categoryStats[t.category].expense += t.amount;
+      categoryStats[tItem.category].expense += tItem.amount;
     }
-    categoryStats[t.category].count += 1;
+    categoryStats[tItem.category].count += 1;
   });
 
   // Global category totals
@@ -78,13 +80,13 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
     e.preventDefault();
     const name = newCatName.trim();
     if (!name) {
-      toast('Kategori adı boş olamaz.', 'warning');
+      toast(language === 'tr' ? 'Kategori adı boş olamaz.' : 'Category name cannot be empty.', 'warning');
       return;
     }
 
     const exists = categories.some(c => c.name.toLowerCase() === name.toLowerCase());
     if (exists) {
-      toast('Bu kategori zaten mevcut.', 'warning');
+      toast(language === 'tr' ? 'Bu kategori zaten mevcut.' : 'This category already exists.', 'warning');
       return;
     }
 
@@ -94,7 +96,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
         color: newCatColor,
         isDefault: false,
       });
-      toast(`"${name}" kategorisi eklendi.`, 'success');
+      toast(`"${name}" ${language === 'tr' ? 'kategorisi eklendi.' : 'category added.'}`, 'success');
       setNewCatName('');
       onRefresh();
     } catch (err: any) {
@@ -113,13 +115,13 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
     if (!editingCategory) return;
     const trimmed = editName.trim();
     if (!trimmed) {
-      toast('Kategori adı boş olamaz.', 'warning');
+      toast(language === 'tr' ? 'Kategori adı boş olamaz.' : 'Category name cannot be empty.', 'warning');
       return;
     }
 
     try {
       await renameCategory(editingCategory.name, trimmed, editColor);
-      toast(`"${editingCategory.name}" güncellendi.`, 'success');
+      toast(`"${editingCategory.name}" ${language === 'tr' ? 'güncellendi.' : 'updated.'}`, 'success');
       setEditingCategory(null);
       onRefresh();
     } catch (err: any) {
@@ -142,7 +144,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
         deleteMode,
         deleteMode === 'move' ? targetCategory : undefined
       );
-      toast(`"${deletingCategory.name}" kategorisi silindi.`, 'success');
+      toast(`"${deletingCategory.name}" ${language === 'tr' ? 'kategorisi silindi.' : 'category deleted.'}`, 'success');
       setDeletingCategory(null);
       onRefresh();
     } catch (err: any) {
@@ -151,7 +153,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
   };
 
   const relatedCount = deletingCategory
-    ? transactions.filter(t => t.category === deletingCategory.name).length
+    ? transactions.filter(tItem => tItem.category === deletingCategory.name).length
     : 0;
 
   const otherCategories = deletingCategory
@@ -163,24 +165,34 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
       {/* Top Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl theme-card shadow-sm border-l-4 border-l-indigo-500">
-          <span className="text-xs font-bold uppercase tracking-wider theme-muted">Toplam Kategori</span>
-          <p className="text-2xl font-extrabold theme-text mt-1">{categories.length} Adet</p>
-          <p className="text-xs text-indigo-500 mt-1 font-semibold">Tüm finansal sınıflar</p>
+          <span className="text-xs font-bold uppercase tracking-wider theme-muted">
+            {t('categories.totalCategories')}
+          </span>
+          <p className="text-2xl font-extrabold theme-text mt-1">{categories.length} {language === 'tr' ? 'Adet' : 'Categories'}</p>
+          <p className="text-xs text-indigo-500 mt-1 font-semibold">
+            {language === 'tr' ? 'Tüm finansal sınıflar' : 'All financial classifications'}
+          </p>
         </div>
 
         <div className="p-4 rounded-2xl theme-card shadow-sm border-l-4 border-l-emerald-500">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Kategorize Gelir</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            {t('categories.categorizedIncome')}
+          </span>
           <p className="text-2xl font-extrabold theme-text mt-1">{formatCurrency(totalIncomeAllCats)}</p>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">
-            {filterPeriod === 'all' ? 'Tüm zamanların geliri' : `${formatMonthName(currentMonth)} geliri`}
+            {filterPeriod === 'all' 
+              ? (language === 'tr' ? 'Tüm zamanların geliri' : 'All-time income') 
+              : `${formatMonthName(currentMonth)}`}
           </p>
         </div>
 
         <div className="p-4 rounded-2xl theme-card shadow-sm border-l-4 border-l-rose-500">
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Kategorize Gider</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            {t('categories.categorizedExpense')}
+          </span>
           <p className="text-2xl font-extrabold theme-text mt-1">{formatCurrency(totalExpenseAllCats)}</p>
           <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 font-semibold">
-            {maxExpenseCat ? `Lider: ${maxExpenseCat}` : 'Henüz gider yok'}
+            {maxExpenseCat ? `${t('categories.topSpendingCat')}: ${maxExpenseCat}` : t('categories.none')}
           </p>
         </div>
       </div>
@@ -189,13 +201,13 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
       <div className="theme-card p-5 sm:p-6 rounded-2xl shadow-sm">
         <h3 className="text-base font-bold theme-text mb-4 flex items-center gap-2">
           <Tag className="w-4 h-4 text-indigo-500" />
-          <span>Yeni Kategori Tanımla</span>
+          <span>{t('categories.newCategory')}</span>
         </h3>
 
         <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <input
             type="text"
-            placeholder="Örn: Abonelikler, Yatırım, Evcil Hayvan..."
+            placeholder={language === 'tr' ? 'Örn: Abonelikler, Yatırım, Evcil Hayvan...' : 'E.g. Subscriptions, Investment, Pets...'}
             value={newCatName}
             onChange={e => setNewCatName(e.target.value)}
             className="flex-1 px-4 py-2.5 rounded-xl theme-input border theme-border text-sm focus:outline-none focus:border-indigo-500"
@@ -207,14 +219,14 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
               value={newCatColor}
               onChange={e => setNewCatColor(e.target.value)}
               className="w-11 h-11 rounded-xl theme-sub-card border theme-border cursor-pointer p-1"
-              title="Kategori Rengi"
+              title="Category Color"
             />
             <button
               type="submit"
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20 active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Ekle</span>
+              <span>{language === 'tr' ? 'Ekle' : 'Add'}</span>
             </button>
           </div>
         </form>
@@ -225,10 +237,10 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 pb-4 border-b theme-border">
           <div>
             <h3 className="text-base font-bold theme-text">
-              Kategoriler ve Finansal Dağılım ({categories.length})
+              {t('categories.title')} ({categories.length})
             </h3>
             <p className="text-xs theme-muted mt-0.5">
-              Her kategorinin gelir ve gider durumunu eşzamanlı inceleyin.
+              {t('categories.subtitle')}
             </p>
           </div>
 
@@ -236,23 +248,23 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
           <div className="flex items-center p-1 rounded-xl theme-sub-card border theme-border">
             <button
               onClick={() => setFilterPeriod('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 filterPeriod === 'all'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'theme-muted hover:opacity-100'
               }`}
             >
-              Tüm Zamanlar
+              {t('categories.allTimeTab')}
             </button>
             <button
               onClick={() => setFilterPeriod('month')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 filterPeriod === 'month'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'theme-muted hover:opacity-100'
               }`}
             >
-              Bu Ay ({formatMonthName(currentMonth)})
+              {t('categories.thisMonthTab')} ({formatMonthName(currentMonth)})
             </button>
           </div>
         </div>
@@ -281,15 +293,15 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
                   <div className="flex items-center gap-1 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleOpenEdit(cat)}
-                      className="p-1.5 rounded-lg theme-sub-card theme-muted hover:text-indigo-500 transition-colors cursor-pointer"
-                      title="Düzenle"
+                      className="p-1.5 rounded-lg theme-sub-card theme-muted hover:text-indigo-500 transition-colors cursor-pointer active:scale-95"
+                      title="Edit"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleOpenDelete(cat)}
-                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
-                      title="Sil"
+                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-600 transition-colors cursor-pointer active:scale-95"
+                      title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -304,7 +316,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
                         <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                           <span className="flex items-center gap-1">
                             <TrendingUp className="w-3.5 h-3.5" />
-                            <span>Gelir:</span>
+                            <span>{t('categories.incomeStat')}:</span>
                           </span>
                           <span>+{formatCurrency(stat.income)}</span>
                         </div>
@@ -314,7 +326,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
                         <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 font-semibold">
                           <span className="flex items-center gap-1">
                             <TrendingDown className="w-3.5 h-3.5" />
-                            <span>Gider:</span>
+                            <span>{t('categories.expenseStat')}:</span>
                           </span>
                           <span>-{formatCurrency(stat.expense)}</span>
                         </div>
@@ -322,7 +334,7 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
 
                       {stat.income > 0 && stat.expense > 0 && (
                         <div className="flex items-center justify-between font-bold pt-1 border-t theme-border">
-                          <span className="theme-muted">Net Bakiye:</span>
+                          <span className="theme-muted">{t('categories.netStat')}:</span>
                           <span className={netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
                             {formatCurrency(netBalance)}
                           </span>
@@ -330,13 +342,13 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
                       )}
 
                       <div className="flex items-center justify-between theme-muted text-[11px] pt-0.5">
-                        <span>İşlem Adedi:</span>
-                        <span className="font-semibold">{stat.count} kayıt</span>
+                        <span>{t('analytics.countCol')}:</span>
+                        <span className="font-semibold">{stat.count} {t('analytics.itemUnit')}</span>
                       </div>
                     </>
                   ) : (
                     <div className="py-2 text-center theme-muted text-xs">
-                      Bu zaman diliminde işlem kaydı yok.
+                      {t('categories.noTransactionsYet')}
                     </div>
                   )}
                 </div>
@@ -350,30 +362,34 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
       <Modal
         isOpen={Boolean(editingCategory)}
         onClose={() => setEditingCategory(null)}
-        title="🖋️ Kategori Düzenle"
+        title={language === 'tr' ? '🖋️ Kategori Düzenle' : '🖋️ Edit Category'}
       >
         <form onSubmit={handleApplyEdit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Kategori Adı</label>
+            <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">
+              {language === 'tr' ? 'Kategori Adı' : 'Category Name'}
+            </label>
             <input
               type="text"
               value={editName}
               onChange={e => setEditName(e.target.value)}
               required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text focus:outline-none focus:border-indigo-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Renk</label>
+            <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">
+              {language === 'tr' ? 'Renk' : 'Color'}
+            </label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
                 value={editColor}
                 onChange={e => setEditColor(e.target.value)}
-                className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer p-1"
+                className="w-12 h-12 rounded-xl theme-sub-card border theme-border cursor-pointer p-1"
               />
-              <span className="text-xs text-slate-400">{editColor}</span>
+              <span className="text-xs theme-muted">{editColor}</span>
             </div>
           </div>
 
@@ -381,15 +397,15 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
             <button
               type="button"
               onClick={() => setEditingCategory(null)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl theme-sub-card border theme-border theme-text text-sm font-medium hover:opacity-80 active:scale-95 cursor-pointer"
             >
-              İptal
+              {t('modal.cancel')}
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 active:scale-95 cursor-pointer"
             >
-              Kaydet
+              {t('modal.saveChanges')}
             </button>
           </div>
         </form>
@@ -399,44 +415,47 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
       <Modal
         isOpen={Boolean(deletingCategory)}
         onClose={() => setDeletingCategory(null)}
-        title="🗑️ Kategoriyi Sil"
+        title={t('categories.deleteModalTitle')}
       >
         <div className="flex flex-col gap-4">
           {relatedCount > 0 ? (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-sm flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-sm flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <div>
-                <strong>"{deletingCategory?.name}"</strong> kategorisine ait <strong>{relatedCount}</strong> adet işlem bulundu.
-                Bu işlemleri ne yapmak istersiniz?
+                <strong>"{deletingCategory?.name}"</strong> {t('categories.deleteModalWarning')}
               </div>
             </div>
           ) : (
-            <p className="text-sm text-slate-300">
-              <strong>"{deletingCategory?.name}"</strong> kategorisini silmek istediğinizden emin misiniz?
+            <p className="text-sm theme-muted">
+              <strong>"{deletingCategory?.name}"</strong> {t('transactions.deleteDesc')}
             </p>
           )}
 
           {relatedCount > 0 && (
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">İşlem Tercihi</label>
+                <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">
+                  {language === 'tr' ? 'İşlem Tercihi' : 'Action Choice'}
+                </label>
                 <select
                   value={deleteMode}
                   onChange={e => setDeleteMode(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text text-sm focus:outline-none"
                 >
-                  <option value="move">Başka Bir Kategoriye Taşı</option>
-                  <option value="delete">Tüm Bağlı İşlemleri de Sil</option>
+                  <option value="move">{t('categories.deleteModalChoiceMove')}</option>
+                  <option value="delete">{t('categories.deleteModalChoiceDelete')}</option>
                 </select>
               </div>
 
               {deleteMode === 'move' && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Hedef Kategori</label>
+                  <label className="block text-xs font-semibold uppercase theme-muted mb-1.5">
+                    {t('categories.targetCategoryLabel')}
+                  </label>
                   <select
                     value={targetCategory}
                     onChange={e => setTargetCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl theme-input border theme-border theme-text text-sm focus:outline-none"
                   >
                     {otherCategories.map(c => (
                       <option key={c.name} value={c.name}>
@@ -449,20 +468,20 @@ export function CategoryManager({ categories, transactions, onRefresh }: Categor
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t theme-border">
             <button
               type="button"
               onClick={() => setDeletingCategory(null)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium hover:bg-slate-700 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl theme-sub-card border theme-border theme-text text-sm font-medium hover:opacity-80 active:scale-95 cursor-pointer"
             >
-              İptal
+              {t('modal.cancel')}
             </button>
             <button
               type="button"
               onClick={handleApplyDelete}
-              className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold shadow-lg shadow-rose-600/20 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold shadow-lg shadow-rose-600/20 active:scale-95 cursor-pointer"
             >
-              Sil ve Uygula
+              {t('categories.confirmCategoryDelete')}
             </button>
           </div>
         </div>

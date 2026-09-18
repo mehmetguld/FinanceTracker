@@ -14,6 +14,7 @@ import {
 import { FinancialSummary, Transaction, CategoryExpenseBreakdown } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { usePrivacy } from '@/context/PrivacyContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SmartInsightsProps {
   summary: FinancialSummary;
@@ -23,6 +24,7 @@ interface SmartInsightsProps {
 
 export function SmartInsights({ summary, transactions, breakdown }: SmartInsightsProps) {
   const { formatPrivate } = usePrivacy();
+  const { t, language } = useLanguage();
 
   if (transactions.length === 0) {
     return null;
@@ -32,46 +34,46 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
 
   // 1. Calculate Financial Health Score (0 - 100)
   let healthScore = 50;
-  let healthTitle = 'Dengeli Bütçe';
+  let healthTitle = language === 'tr' ? 'Dengeli Bütçe' : 'Balanced Budget';
   let healthColor = 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30';
 
   if (totalIncome > 0) {
     const savingsRatio = (totalIncome - totalExpense) / totalIncome;
     if (savingsRatio >= 0.4) {
       healthScore = 95;
-      healthTitle = 'Mükemmel Tasarruf';
+      healthTitle = language === 'tr' ? 'Mükemmel Tasarruf' : 'Excellent Savings';
       healthColor = 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
     } else if (savingsRatio >= 0.2) {
       healthScore = 80;
-      healthTitle = 'İyi & Güvenli';
+      healthTitle = language === 'tr' ? 'İyi & Güvenli' : 'Safe & Sound';
       healthColor = 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
     } else if (savingsRatio >= 0) {
       healthScore = 65;
-      healthTitle = 'Hassas Denge';
+      healthTitle = language === 'tr' ? 'Hassas Denge' : 'Delicate Balance';
       healthColor = 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30';
     } else {
       healthScore = 35;
-      healthTitle = 'Bütçe Açığı Uyarısı';
+      healthTitle = language === 'tr' ? 'Bütçe Açığı Uyarısı' : 'Budget Deficit Alert';
       healthColor = 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/30';
     }
   } else if (totalExpense > 0) {
     healthScore = 25;
-    healthTitle = 'Sadece Gider Kayıtlı';
+    healthTitle = language === 'tr' ? 'Sadece Gider Kayıtlı' : 'Expenses Only';
     healthColor = 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30';
   }
 
   // 2. Find Largest Single Expense
-  const expenses = transactions.filter(t => t.type === 'expense');
+  const expenses = transactions.filter(tItem => tItem.type === 'expense');
   let maxExpense: Transaction | null = null;
   if (expenses.length > 0) {
-    maxExpense = expenses.reduce((max, t) => (t.amount > max.amount ? t : max), expenses[0]);
+    maxExpense = expenses.reduce((max, tItem) => (tItem.amount > max.amount ? tItem : max), expenses[0]);
   }
 
   // 3. Top Category Dominance
   const topCategory = breakdown[0];
 
   // 4. Daily Average Expense
-  const dates = Array.from(new Set(transactions.map(t => t.date)));
+  const dates = Array.from(new Set(transactions.map(tItem => tItem.date)));
   const daysCount = Math.max(1, dates.length);
   const dailyAverage = totalExpense / daysCount;
 
@@ -90,19 +92,23 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
           </div>
           <div>
             <h3 className="text-base font-bold theme-text flex items-center gap-2">
-              <span>Akıllı Finansal İçgörüler</span>
+              <span>{language === 'tr' ? 'Akıllı Finansal İçgörüler' : 'Smart Financial Insights'}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-500 font-bold border border-indigo-500/30">
                 AI ANALİZ
               </span>
             </h3>
-            <p className="text-xs theme-muted">Harcama ritminize göre otomatik üretilen stratejik ipuçları</p>
+            <p className="text-xs theme-muted">
+              {language === 'tr'
+                ? 'Harcama ritminize göre otomatik üretilen stratejik ipuçları'
+                : 'Automated strategic advice calculated from your spending pattern'}
+            </p>
           </div>
         </div>
 
         {/* Health Score Pill */}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold ${healthColor} self-start sm:self-auto`}>
           <Award className="w-4 h-4" />
-          <span>Skor: %{healthScore} • {healthTitle}</span>
+          <span>{language === 'tr' ? 'Skor' : 'Score'}: %{healthScore} • {healthTitle}</span>
         </div>
       </div>
 
@@ -112,22 +118,30 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
         <div className="p-3.5 rounded-xl theme-sub-card border theme-border flex flex-col justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold theme-muted">
             <Activity className="w-4 h-4 text-indigo-500" />
-            <span>Nakit Durumu</span>
+            <span>{language === 'tr' ? 'Nakit Durumu' : 'Cash Position'}</span>
           </div>
           <div className="mt-2">
             <p className="text-sm font-bold theme-text leading-snug">
               {balance >= 0 ? (
                 <span>
-                  Gelirleriniz giderlerinizin <strong className="text-emerald-500">üzerinde</strong> seyrediyor.
+                  {language === 'tr' ? (
+                    <>Gelirleriniz giderlerinizin <strong className="text-emerald-500">üzerinde</strong> seyrediyor.</>
+                  ) : (
+                    <>Your income is <strong className="text-emerald-500">outpacing</strong> your expenses.</>
+                  )}
                 </span>
               ) : (
                 <span>
-                  Harcamalarınız gelirlerinizi <strong className="text-rose-500">aştı</strong>.
+                  {language === 'tr' ? (
+                    <>Harcamalarınız gelirlerinizi <strong className="text-rose-500">aştı</strong>.</>
+                  ) : (
+                    <>Your expenses have <strong className="text-rose-500">exceeded</strong> your income.</>
+                  )}
                 </span>
               )}
             </p>
             <p className="text-[11px] theme-muted mt-1">
-              Net Bakiye: <span className="font-semibold">{formatPrivate(formatCurrency(balance))}</span>
+              {language === 'tr' ? 'Net Bakiye' : 'Net Balance'}: <span className="font-semibold">{formatPrivate(formatCurrency(balance))}</span>
             </p>
           </div>
         </div>
@@ -136,20 +150,26 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
         <div className="p-3.5 rounded-xl theme-sub-card border theme-border flex flex-col justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold theme-muted">
             <TrendingDown className="w-4 h-4 text-rose-500" />
-            <span>En Çok Harcanan</span>
+            <span>{language === 'tr' ? 'En Çok Harcanan' : 'Top Expense'}</span>
           </div>
           <div className="mt-2">
             {topCategory ? (
               <>
                 <p className="text-sm font-bold theme-text leading-snug">
-                  Harcamaların <strong className="text-rose-500">%{topCategory.percentage.toFixed(0)}</strong> payı <strong>{topCategory.category}</strong> kategorisinde.
+                  {language === 'tr' ? (
+                    <>Harcamaların <strong className="text-rose-500">%{topCategory.percentage.toFixed(0)}</strong> payı <strong>{topCategory.category}</strong> kategorisinde.</>
+                  ) : (
+                    <><strong>{topCategory.category}</strong> takes <strong className="text-rose-500">%{topCategory.percentage.toFixed(0)}</strong> of all spending.</>
+                  )}
                 </p>
                 <p className="text-[11px] theme-muted mt-1">
-                  Tutar: <span className="font-semibold">{formatPrivate(formatCurrency(topCategory.amount))}</span>
+                  {language === 'tr' ? 'Tutar' : 'Total'}: <span className="font-semibold">{formatPrivate(formatCurrency(topCategory.amount))}</span>
                 </p>
               </>
             ) : (
-              <p className="text-xs theme-muted">Gider kaydı bulunmuyor.</p>
+              <p className="text-xs theme-muted">
+                {language === 'tr' ? 'Gider kaydı bulunmuyor.' : 'No expense recorded.'}
+              </p>
             )}
           </div>
         </div>
@@ -158,14 +178,20 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
         <div className="p-3.5 rounded-xl theme-sub-card border theme-border flex flex-col justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold theme-muted">
             <Calendar className="w-4 h-4 text-amber-500" />
-            <span>Günlük Tempo</span>
+            <span>{language === 'tr' ? 'Günlük Tempo' : 'Daily Pace'}</span>
           </div>
           <div className="mt-2">
             <p className="text-sm font-bold theme-text leading-snug">
-              İşlem günlerinde ortalama <strong className="text-amber-500">{formatPrivate(formatCurrency(dailyAverage))}</strong> harcıyorsunuz.
+              {language === 'tr' ? (
+                <>İşlem günlerinde ortalama <strong className="text-amber-500">{formatPrivate(formatCurrency(dailyAverage))}</strong> harcıyorsunuz.</>
+              ) : (
+                <>Average active daily spend is <strong className="text-amber-500">{formatPrivate(formatCurrency(dailyAverage))}</strong>.</>
+              )}
             </p>
             <p className="text-[11px] theme-muted mt-1">
-              {daysCount} aktif günde {expenses.length} harcama
+              {language === 'tr' 
+                ? `${daysCount} aktif günde ${expenses.length} harcama`
+                : `${expenses.length} expenses over ${daysCount} active days`}
             </p>
           </div>
         </div>
@@ -174,7 +200,7 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
         <div className="p-3.5 rounded-xl theme-sub-card border theme-border flex flex-col justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold theme-muted">
             <AlertCircle className="w-4 h-4 text-purple-500" />
-            <span>Zirve Harcama</span>
+            <span>{language === 'tr' ? 'Zirve Harcama' : 'Peak Expense'}</span>
           </div>
           <div className="mt-2">
             {maxExpense ? (
@@ -187,7 +213,9 @@ export function SmartInsights({ summary, transactions, breakdown }: SmartInsight
                 </p>
               </>
             ) : (
-              <p className="text-xs theme-muted">Kayıtlı işlem yok.</p>
+              <p className="text-xs theme-muted">
+                {language === 'tr' ? 'Kayıtlı işlem yok.' : 'No recorded transactions.'}
+              </p>
             )}
           </div>
         </div>

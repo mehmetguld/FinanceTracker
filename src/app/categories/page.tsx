@@ -5,10 +5,12 @@ import { CategoryManager } from '@/components/categories/CategoryManager';
 import { db, ensureInitialized } from '@/lib/db';
 import { Category, Transaction } from '@/types';
 import { useGlobalModal } from '@/context/ModalContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Tags } from 'lucide-react';
 
 export default function CategoriesPage() {
   const { refreshTrigger } = useGlobalModal();
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -31,10 +33,10 @@ export default function CategoriesPage() {
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold theme-text tracking-tight flex items-center gap-2">
           <Tags className="w-6 h-6 text-indigo-500" />
-          <span>Kategori Yönetimi</span>
+          <span>{t('categories.title')}</span>
         </h1>
         <p className="text-xs sm:text-sm theme-muted mt-1">
-          Harcama ve gelirlerinizi sınıflandırın, özel renkler tanımlayın ve yönetin.
+          {t('categories.subtitle')}
         </p>
       </div>
 
