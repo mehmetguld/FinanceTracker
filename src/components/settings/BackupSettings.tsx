@@ -74,7 +74,7 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
     reader.readAsText(file);
   };
 
-  // Excel (.xls) Styled Spreadsheet Export
+  // Excel (.xlsx) Real Spreadsheet Export
   const handleExportAllExcel = async () => {
     try {
       const all = await db.transactions.toArray();
@@ -82,7 +82,7 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
         toast(t('transactions.noExportData'), 'warning');
         return;
       }
-      exportTransactionsToExcel(all, 'all_transactions_table.xls');
+      exportTransactionsToExcel(all, 'all_transactions_table.xlsx');
       toast(t('transactions.excelDownloaded'), 'success');
     } catch (err: any) {
       toast('Excel export error', 'error');
@@ -312,8 +312,8 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
           </h3>
           <p className="text-xs theme-muted mt-0.5">
             {language === 'tr'
-              ? 'Excel tablosu (.xls), virgülle ayrılmış veri (.csv) veya yazdırılabilir PDF raporları oluşturun.'
-              : 'Generate styled Excel (.xls), CSV, or printable financial summary reports.'}
+              ? 'Gerçek Excel tablosu (.xlsx), virgülle ayrılmış veri (.csv) veya yazdırılabilir PDF raporları oluşturun.'
+              : 'Generate real Excel (.xlsx), CSV, or printable financial summary reports.'}
           </p>
         </div>
 
@@ -323,7 +323,7 @@ export function BackupSettings({ onRefresh }: BackupSettingsProps) {
             className="flex items-center justify-center gap-2 p-3 rounded-xl theme-sub-card hover:opacity-80 theme-text text-xs font-semibold border theme-border active:scale-95 transition-all cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-            <span>Excel (.xls)</span>
+            <span>Excel (.xlsx)</span>
           </button>
 
           <button

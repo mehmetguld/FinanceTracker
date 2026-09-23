@@ -137,7 +137,7 @@ export function TransactionList({
           {/* Export Buttons */}
           <button
             onClick={handleExportExcel}
-            title="Excel Tablosu (.xls) İndir"
+            title="Excel Tablosu (.xlsx) İndir"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl theme-sub-card hover:opacity-80 theme-text text-xs font-semibold border theme-border transition-colors cursor-pointer active:scale-95"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
@@ -259,19 +259,21 @@ export function TransactionList({
                       {formatPrivate(formatCurrency(tItem.amount))}
                     </span>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 sm:opacity-70 transition-opacity">
+                    {/* Action Buttons: 100% visible on mobile, hover on desktop */}
+                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onEditTransaction(tItem)}
-                        className="p-1.5 rounded-lg theme-sub-card theme-text hover:bg-indigo-500 hover:text-white transition-colors cursor-pointer active:scale-95"
+                        className="p-1.5 rounded-lg theme-sub-card border theme-border theme-text hover:bg-indigo-500 hover:text-white transition-colors cursor-pointer active:scale-90"
                         title="Düzenle"
+                        aria-label="Düzenle"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-3.5 h-3.5 text-indigo-500" />
                       </button>
                       <button
                         onClick={() => setDeleteCandidate(tItem)}
-                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-600 transition-colors cursor-pointer active:scale-95"
+                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-600 border border-rose-500/20 transition-colors cursor-pointer active:scale-90"
                         title="Sil"
+                        aria-label="Sil"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Transaction } from '@/types';
+import * as XLSX from 'xlsx';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -183,90 +184,69 @@ export function exportTransactionsToCSV(transactions: Transaction[], filename: s
 }
 
 /**
- * Excel (.xls) Styled Spreadsheet Generator:
- * Generates an XML/HTML formatted Excel spreadsheet with colorful styled headers,
- * formatted numbers, colored rows (green for income, red for expense),
- * and a summary calculation footer!
+ * Real Microsoft Excel (.xlsx) Spreadsheet Generator:
+ * Generates an actual, valid binary Office Open XML (.xlsx) workbook using SheetJS.
+ * Opens seamlessly across Windows/Mac Excel, Excel Mobile (iOS/Android),
+ * Google Sheets, and LibreOffice without any warning or corruption prompt!
  */
-export function exportTransactionsToExcel(transactions: Transaction[], filename: string = 'gelir-gider-tablosu.xls') {
+export function exportTransactionsToExcel(transactions: Transaction[], filename: string = 'gelir-gider-tablosu.xlsx') {
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  const html = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>İşlemler</x:Name>
-              <x:WorksheetOptions>
-                <x:DisplayGridlines/>
-              </x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
-      <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
-      <style>
-        table { border-collapse: collapse; width: 100%; font-family: Calibri, sans-serif; font-size: 11pt; }
-        th { background-color: #4F46E5; color: #FFFFFF; font-weight: bold; border: 1px solid #3730A3; padding: 10px; text-align: left; }
-        td { border: 1px solid #CBD5E1; padding: 8px; }
-        .income { color: #16A34A; font-weight: bold; text-align: right; }
-        .expense { color: #E11D48; font-weight: bold; text-align: right; }
-        .amount { text-align: right; }
-        .center { text-align: center; }
-        .footer-label { font-weight: bold; background-color: #E2E8F0; }
-        .footer-val { font-weight: bold; background-color: #E2E8F0; text-align: right; }
-      </style>
-    </head>
-    <body>
-      <table>
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>İşlem Türü</th>
-            <th>Kategori</th>
-            <th>Açıklama</th>
-            <th>Tutar (₺)</th>
-            <th>Net Bakiye Etkisi (₺)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${transactions
-            .map(
-              t => `
-            <tr>
-              <td class="center">${t.date}</td>
-              <td class="${t.type === 'income' ? 'income' : 'expense'}">${t.type === 'income' ? 'Gelir' : 'Gider'}</td>
-              <td>${t.category}</td>
-              <td>${(t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
-              <td class="amount">₺${t.amount.toFixed(2).replace('.', ',')}</td>
-              <td class="${t.type === 'income' ? 'income' : 'expense'}">${t.type === 'income' ? '+' : '-'}₺${t.amount.toFixed(2).replace('.', ',')}</td>
-            </tr>
-          `
-            )
-            .join('')}
-          <tr>
-            <td colspan="4" class="footer-label">TOPLAM GELİR:</td>
-            <td colspan="2" class="footer-val" style="color: #16A34A;">₺${totalIncome.toFixed(2).replace('.', ',')}</td>
-          </tr>
-          <tr>
-            <td colspan="4" class="footer-label">TOPLAM GİDER:</td>
-            <td colspan="2" class="footer-val" style="color: #E11D48;">₺${totalExpense.toFixed(2).replace('.', ',')}</td>
-          </tr>
-          <tr>
-            <td colspan="4" class="footer-label">NET BAKİYE:</td>
-            <td colspan="2" class="footer-val" style="color: #4F46E5;">₺${balance.toFixed(2).replace('.', ',')}</td>
-          </tr>
-        </tbody>
-      </table>
-    </body>
-    </html>
-  `;
+  const rows = transactions.map(t => ({
+    'Tarih': t.date,
+    'İşlem Türü': t.type === 'income' ? 'Gelir' : 'Gider',
+    'Kategori': t.category,
+    'Açıklama': t.description || '',
+    'Tutar (TL)': t.amount,
+    'Net Bakiye Etkisi (TL)': (t.type === 'income' ? 1 : -1) * t.amount,
+  }));
 
-  downloadFile(html, filename, 'application/vnd.ms-excel;charset=utf-8;');
+  // Summary footer rows
+  rows.push({
+    'Tarih': '',
+    'İşlem Türü': '',
+    'Kategori': '',
+    'Açıklama': 'TOPLAM GELİR',
+    'Tutar (TL)': totalIncome,
+    'Net Bakiye Etkisi (TL)': totalIncome,
+  });
+  rows.push({
+    'Tarih': '',
+    'İşlem Türü': '',
+    'Kategori': '',
+    'Açıklama': 'TOPLAM GİDER',
+    'Tutar (TL)': totalExpense,
+    'Net Bakiye Etkisi (TL)': -totalExpense,
+  });
+  rows.push({
+    'Tarih': '',
+    'İşlem Türü': '',
+    'Kategori': '',
+    'Açıklama': 'NET BAKİYE',
+    'Tutar (TL)': balance,
+    'Net Bakiye Etkisi (TL)': balance,
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // Set column widths for comfortable reading
+  ws['!cols'] = [
+    { wch: 13 }, // Tarih
+    { wch: 12 }, // İşlem Türü
+    { wch: 18 }, // Kategori
+    { wch: 32 }, // Açıklama
+    { wch: 15 }, // Tutar (TL)
+    { wch: 22 }, // Net Bakiye Etkisi (TL)
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'İşlemler');
+
+  const finalName = filename.endsWith('.xlsx')
+    ? filename
+    : filename.replace(/\.xls$/, '') + '.xlsx';
+
+  XLSX.writeFile(wb, finalName);
 }
